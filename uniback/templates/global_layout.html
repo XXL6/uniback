@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Uniback</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='global.css') }}">
+</head>
+<header class="global-header">
+    <nav class="navbar navbar-expand-md navbar-light bg-light">
+        <div class="container">
+            <a class="nav-item nav-link" href="{{ url_for('main.home') }}">Home</a>
+        </div>
+    </nav>
+</header>
+<body>
+    {% block content %}{% endblock %}
+    <script src="{{ url_for('static', filename='jquery.js') }}"></script>
+    <script src="{{ url_for('static', filename='bootstrap.js') }}"></script>
+</body>
+</html>
