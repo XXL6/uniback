@@ -1,3 +1,5 @@
+<!-- Layout template for all of the pages of the app. Created mainly to include things like jquery, and
+    bootstrap which will be used throughout the interface -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,16 +9,8 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='global.css') }}">
 </head>
-<header class="global-header">
-    <nav class="navbar navbar-expand-md navbar-light bg-light">
-        <div class="container">
-            <a class="nav-item nav-link" href="{{ url_for('main.home') }}">Home</a>
-        </div>
-    </nav>
-</header>
-<body>
-    {% block content %}{% endblock %}
-    <script src="{{ url_for('static', filename='jquery.js') }}"></script>
-    <script src="{{ url_for('static', filename='bootstrap.js') }}"></script>
-</body>
+{% block app_content %}
+{% endblock app_content %}
+<script src="{{ url_for('static', filename='jquery.js') }}"></script>
+<script src="{{ url_for('static', filename='bootstrap.js') }}"></script>
 </html>

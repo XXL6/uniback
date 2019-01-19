@@ -1,0 +1,27 @@
+<!-- Main layout for the application. Mainly created so that the login page could be separated yet retain
+    all the necessary packages like bootstrap, etc. -->
+{% extends "global_layout.html" %}
+{% block app_content %}
+<header class="global-header">
+    <nav class="navbar navbar-expand-md navbar-light bg-light">
+        <div class="container">
+            <a class="nav-item nav-link" href="{{ url_for('main.home') }}">Home</a>
+            <h1>SMALL BEEPIS</h1>
+        </div>
+    </nav>
+</header>
+<body>
+    {% block content %}{% endblock content%}
+    <div class="col-md-8">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+</body>
+{% endblock app_content %}
