@@ -1,12 +1,10 @@
 {% extends "global_layout.html" %}
 {% block app_content %}
 <body>
-<main role="main" class="container">
-<div class="row">
     <form method="POST">
         {{ form.hidden_tag() }}
         <div class="container">
-            <fieldset class="form-group col-md-2">
+            <fieldset class="form-group col-md-4 offset-md-4">
                 <legend class="border-bottom mb-4 mt-4">Log In</legend>
                 <div class="form-group">
                     {{ form.username.label(class="form-control-label") }}
@@ -45,7 +43,16 @@
             </fieldset>
         </div>
     </form>
-</div>
-</main>
+    <div class="form-group col-md-4 offset-md-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
 </body>
 {% endblock app_content %}

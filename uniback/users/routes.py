@@ -13,12 +13,12 @@ def login():
         return redirect(url_for('main.home'))
     form = LoginForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(email=form.username.data).first()
+        user = User.query.filter_by(username=form.username.data).first()
         if user and bcrypt.check_password_hash(user.password, form.password.data):
             login_user(user, remember=form.remember_me.data)
             return redirect(url_for('main.home'))
         else:
-            flash('No user with such name', 'danger')
+            flash('Wrong username or password', 'danger')
     return render_template('login.html', form=form)
 
 

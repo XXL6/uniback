@@ -22,4 +22,3 @@ class UpdateAccountForm(FlaskForm):
             user = User.query.filter_by(username=username.data).first()
             if user:
                 raise ValidationError("Username already in user. Choose a different one.")
-7

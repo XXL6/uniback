@@ -18,6 +18,8 @@ def create_app(config_class=Config):
     app.register_blueprint(main)
     app.register_blueprint(users)
     db.init_app(app)
+    with app.app_context():
+        db.create_all()
     bcrypt.init_app(app)
     login_manager.init_app(app)
 
