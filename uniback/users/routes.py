@@ -7,6 +7,7 @@ from uniback import bcrypt, db
 users = Blueprint('users', '__name__')
 
 
+@users.route('/', methods=['GET', 'POST'])
 @users.route('/login', methods={'GET', 'POST'})
 def login():
     if current_user.is_authenticated:
