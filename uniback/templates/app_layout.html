@@ -2,23 +2,33 @@
     all the necessary packages like bootstrap, etc. -->
 {% extends "global_layout.html" %}
 {% block app_content %}
-<link rel="stylesheet" href="{{ url_for('static', filename='app_layout.css') }}">
-<header class="global-header">
-    <nav class="navbar navbar-expand-md navbar-light bg-light">
-        <div class="container">
-            <!-- <a class="nav-item nav-link" href="{{ url_for('main.home') }}">Home</a> -->
-            <ul class="nav nav-pills col-md-9">
-                <li class="active col-md-2"><a href="#">Dashboard</a></li>
-                <li class="col-md-2"><a href="#">Backup</a></li>
-                <li class="col-md-2"><a href="#">Restore</a></li>
-                <li class="col-md-2"><a href="#">Repositories</a></li>
-                <li class="col-md-2"><a href="#">Settings</a></li>
-            </ul>
-            <a class="nav-item nav-link col-md-3" href="{{ url_for('users.logout') }}">Logout</a>
-        </div>
-    </nav>
-</header>
+<link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='app_layout.css') }}">
 <body>
+    <header class="app-header">
+        <nav class="navbar navbar-expand-md navbar-light bg-light">
+            <div class="container">
+                <!-- <a class="nav-item nav-link" href="{{ url_for('main.home') }}">Home</a> -->
+                <ul class="nav nav-pills col-md-9">
+                    <li class="active col-md-2"><a href="#">Dashboard</a></li>
+                    <li class="col-md-2"><a href="#">Backup</a></li>
+                    <li class="col-md-2"><a href="#">Restore</a></li>
+                    <li class="col-md-2"><a href="#">Repositories</a></li>
+                    <li class="col-md-2"><a href="#">Settings</a></li>
+                </ul>
+                <a class="nav-item nav-link col-md-3" href="{{ url_for('users.logout') }}">Logout</a>
+            </div>
+            <button type="button" class="btn btn-default btn-lg">
+              <i class="glyphicon glyphicon-star"></i> Star
+            </button>
+        </nav>
+        <ul class="nav nav-pills col-md-9">
+            <li class="active col-md-2"><a href="#">Dashboard</a></li>
+            <li class="col-md-2"><a href="#">Backup</a></li>
+            <li class="col-md-2"><a href="#">Restore</a></li>
+            <li class="col-md-2"><a href="#">Repositories</a></li>
+            <li class="col-md-2"><a href="#">Settings</a></li>
+        </ul>
+    </header>
     {% block content %}{% endblock content%}
     <div class="col-md-8">
         {% with messages = get_flashed_messages(with_categories=true) %}

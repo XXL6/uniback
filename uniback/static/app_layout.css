@@ -1,4 +1,9 @@
-.navbar .nav-pills >li >a {
+.app-header {
+    color: #ffffff;
+    background-color: #ffffff;
+}
+
+.navbar .nav-pills > li > a {
     color: #005580
 }
 

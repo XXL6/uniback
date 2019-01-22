@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, url_for
 from flask_sqlalchemy import SQLAlchemy
 from uniback.config import Config
 from flask_bcrypt import Bcrypt
@@ -20,9 +20,10 @@ def create_app(config_class=Config):
     app.register_blueprint(users)
     app.register_blueprint(backup)
     db.init_app(app)
+    login_manager.init_app(app)
+    bcrypt.init_app(app)
     with app.app_context():
         db.create_all()
-    bcrypt.init_app(app)
-    login_manager.init_app(app)
+    login_manager.login_view = "users.login"
 
     return app
