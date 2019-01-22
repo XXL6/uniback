@@ -9,6 +9,7 @@ verify_ssl = true
 flask = "*"
 flask-login = "*"
 flask-sqlalchemy = "*"
+flask-bcrypt = "*"
 wtforms = "*"
 
 [requires]
