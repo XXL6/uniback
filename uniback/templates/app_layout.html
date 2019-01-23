@@ -14,38 +14,12 @@
     <header class="app-header">
         <nav class="navbar navbar-expand-md navbar-light bg-light">
             <div class="container-fluid">
-                <!-- <a class="nav-item nav-link" href="{{ url_for('main.home') }}">Home</a> -->
                 <ul class="nav nav-pills">
                     {% for href, id, name in navigation_pills %}
-                        <li class="nav-item {% if id == active_page %} active {% endif %}">
+                        <li class="nav-item {% if id == active_tab %} active {% endif %}">
                             <a class="nav-link" href="{{ href }}">{{ name }}</a>
                         </li>
                     {% endfor %}
-                    <!--
-                    <li class="nav-item">
-
-
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('backup.job_queue') }}">
-                            Backup
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            Restore
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            Repositories
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            Settings
-                        </a>
-                    </li>-->
                 </ul>
                 <a class="nav-item nav-link col-md-1 offset-md-5" href="{{ url_for('users.logout') }}">Logout</a>
             </div>
