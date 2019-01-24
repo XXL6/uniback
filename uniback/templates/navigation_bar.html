@@ -1,0 +1,19 @@
+{# not really necessary but I wanted to practice making a macro :^) #}
+
+{% set navigation_pills = [
+    (url_for('main.home'), 'dashboard', 'Dashboard'),
+    (url_for('backup.job_queue'), 'backup', 'Backup'),
+    (url_for('restore.repositories'), 'restore', 'Restore'),
+    (url_for('main.home'), 'repositories', 'Repositories'),
+    (url_for('settings.account'), 'settings', 'Settings')
+] -%}
+
+{% macro render_navigation_pills(pill_list, active_tab, sep=False) %}
+    <ul class="nav nav-pills">
+        {% for href, id, name in navigation_pills %}
+            <li class="nav-item {% if id == active_tab %} active {% endif %}">
+                <a class="nav-link" href="{{ href }}">{{ name }}</a>
+            </li>
+        {% endfor %}
+    </ul>
+{% endmacro %}
