@@ -1,4 +1,9 @@
 body {
     background-color: #eeeeee;
     color: #000000;
+    height: 100%;
+}
+
+html, .container-fluid {
+    height: 100%;
 }

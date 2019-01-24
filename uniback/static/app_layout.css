@@ -1,5 +1,5 @@
 .app-header {
-    color: #ffffff;
+    color: #000000;
     background-color: #ffffff;
 }
 
@@ -8,10 +8,24 @@
 }
 
 .navbar .nav-pills > li > a:hover {
-    background-color: #0088cc;
+    background-color: #ffe0b2;
 }
 
 .navbar .nav-pills .active > a {
-    background-color: #cccc;
-    color: #0088cc;
+    background-color: #ff9800;
+    color: #ffffff;
+}
+
+.menu-container {
+    border-right: 1px dashed #333;
+    background-color: #ddddff;
+    min-height: 1000;
+}
+
+.menu-item .nav-link{
+    background-color: #c5cae9;
+}
+
+.menu-item .nav-link .active{
+    background-color: #5c6bc0;
 }

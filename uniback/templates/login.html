@@ -44,15 +44,7 @@
         </div>
     </form>
     <div class="form-group col-md-4 offset-md-4">
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category }}">
-                        {{ message }}
-                    </div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
+        {{ render_flashed_messages() }}
     </div>
 </body>
 {% endblock app_content %}
