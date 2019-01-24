@@ -1,0 +1,12 @@
+{% extends "app_layout.html" %}
+{% set active_tab = "settings" %}
+{% set menu_list = [
+    (url_for('settings.account'), 'account', 'Account'),
+    (url_for('settings.system'), 'system', 'System')
+] -%}
+{% from "menu_generator.html" import generate_menu %}
+{% block tab_content %}
+    {{ generate_menu(menu_list, active_menu, 'Settings') }}
+    {% block menu_content %}
+    {% endblock menu_content %}
+{% endblock tab_content %}

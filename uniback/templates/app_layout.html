@@ -1,67 +1,24 @@
-<!-- Main layout for the application. Mainly created so that the login page could be separated yet retain
-    all the necessary packages like bootstrap, etc. -->
+{# Main layout for the application. Mainly created so that the login page could be separated yet retain
+    all the necessary packages like bootstrap, etc. #}
 {% extends "global_layout.html" %}
 {% block app_content %}
-{% set navigation_pills = [
-    (url_for('main.home'), 'dashboard', 'Dashboard'),
-    (url_for('backup.job_queue'), 'backup', 'Backup'),
-    (url_for('restore.repositories'), 'restore', 'Restore'),
-    (url_for('main.home'), 'repositories', 'Repositories'),
-    (url_for('main.home'), 'settings', 'Settings')
-] -%}
+{% import "navigation_bar.html" as navigation_bar %}
 <link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='app_layout.css') }}">
 <body>
     <header class="app-header">
         <nav class="navbar navbar-expand-md navbar-light bg-light">
             <div class="container-fluid">
-                <!-- <a class="nav-item nav-link" href="{{ url_for('main.home') }}">Home</a> -->
-                <ul class="nav nav-pills">
-                    {% for href, id, name in navigation_pills %}
-                        <li class="nav-item {% if id == active_page %} active {% endif %}">
-                            <a class="nav-link" href="{{ href }}">{{ name }}</a>
-                        </li>
-                    {% endfor %}
-                    <!--
-                    <li class="nav-item">
-
-
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('backup.job_queue') }}">
-                            Backup
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            Restore
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            Repositories
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            Settings
-                        </a>
-                    </li>-->
-                </ul>
+                {{ navigation_bar.render_navigation_pills(navigation_bar.navigation_pills, active_tab) }}
                 <a class="nav-item nav-link col-md-1 offset-md-5" href="{{ url_for('users.logout') }}">Logout</a>
             </div>
         </nav>
     </header>
-    {% block tab_content %}{% endblock tab_content%}
+
+    {% block tab_content %}
+    {% endblock tab_content%}
+
     <div class="col-md-8">
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category }}">
-                        {{ message }}
-                    </div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
+        {{ render_flashed_messages() }}
     </div>
 </body>
 {% endblock app_content %}
