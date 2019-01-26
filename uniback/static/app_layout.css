@@ -18,6 +18,7 @@
 
 .navbar .nav-pills > li > a:hover {
     background-color: #ffe0b2;
+    color: #111111;
 }
 
 .navbar .nav-pills .active > a {

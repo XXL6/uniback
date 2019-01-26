@@ -19,11 +19,13 @@ def create_app(config_class=Config):
     from uniback.backup.routes import backup
     from uniback.restore.routes import restore
     from uniback.settings.routes import settings
+    from uniback.repositories.routes import repositories
     app.register_blueprint(main)
     app.register_blueprint(users)
     app.register_blueprint(backup)
     app.register_blueprint(restore)
     app.register_blueprint(settings)
+    app.register_blueprint(repositories)
     db.init_app(app)
     login_manager.init_app(app)
     bcrypt.init_app(app)
