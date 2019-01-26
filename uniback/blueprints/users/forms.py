@@ -2,7 +2,7 @@ from flask_wtf import FlaskForm
 from flask_login import current_user
 from wtforms import StringField, PasswordField, SubmitField, BooleanField
 from wtforms.validators import DataRequired, ValidationError, EqualTo
-from uniback.users.models import User
+from uniback.blueprints.users.models import User
 
 
 class LoginForm(FlaskForm):

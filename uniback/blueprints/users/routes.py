@@ -1,7 +1,7 @@
 from flask import Blueprint, redirect, url_for, flash, render_template
 from flask_login import login_user, current_user, logout_user, login_required
-from uniback.users.forms import LoginForm, UpdateAccountForm
-from uniback.users.models import User
+from uniback.blueprints.users.forms import LoginForm, UpdateAccountForm
+from uniback.blueprints.users.models import User
 from uniback import bcrypt, db
 
 users = Blueprint('users', '__name__')

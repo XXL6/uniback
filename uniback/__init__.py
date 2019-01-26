@@ -1,4 +1,4 @@
-from flask import Flask, url_for
+from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from uniback.config import Config
 from flask_bcrypt import Bcrypt
@@ -14,12 +14,12 @@ login_manager.login_message_category = 'info'
 def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(Config)
-    from uniback.main.routes import main
-    from uniback.users.routes import users
-    from uniback.backup.routes import backup
-    from uniback.restore.routes import restore
-    from uniback.settings.routes import settings
-    from uniback.repositories.routes import repositories
+    from uniback.blueprints.main.routes import main
+    from uniback.blueprints.users.routes import users
+    from uniback.blueprints.backup.routes import backup
+    from uniback.blueprints.restore.routes import restore
+    from uniback.blueprints.settings.routes import settings
+    from uniback.blueprints.repositories.routes import repositories
     app.register_blueprint(main)
     app.register_blueprint(users)
     app.register_blueprint(backup)
