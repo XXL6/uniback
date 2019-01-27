@@ -11,16 +11,19 @@ login_manager = LoginManager()
 login_manager.login_view = 'users.login'
 login_manager.login_message_category = 'info'
 
+
 def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(Config)
     from uniback.blueprints.main.routes import main
+    from uniback.blueprints.jobs.routes import jobs
     from uniback.blueprints.users.routes import users
     from uniback.blueprints.backup.routes import backup
     from uniback.blueprints.restore.routes import restore
     from uniback.blueprints.settings.routes import settings
     from uniback.blueprints.repositories.routes import repositories
     app.register_blueprint(main)
+    app.register_blueprint(jobs)
     app.register_blueprint(users)
     app.register_blueprint(backup)
     app.register_blueprint(restore)

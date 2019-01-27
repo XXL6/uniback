@@ -1,0 +1,4 @@
+class JobStatus:
+    JOB_STATUS_RUNNING = 0
+    JOB_STATUS_QUEUED = 1
+    JOB_STATUS_PAUSED = 2

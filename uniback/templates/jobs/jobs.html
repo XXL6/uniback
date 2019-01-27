@@ -1,12 +1,11 @@
 {% extends "app_layout.html" %}
-{% set active_tab = "backup" %}
+{% set active_tab = "jobs" %}
 {% set menu_list = [
-    (url_for('backup.saved_jobs'), 'saved_jobs', 'Saved Jobs'),
-    (url_for('backup.job_history'), 'job_history', 'Job History')
+    (url_for('jobs.job_queue'), 'job_queue', 'Job Queue')
 ] -%}
 {% from "menu_generator.html" import generate_menu %}
 {% block tab_content %}
-    {{ generate_menu(menu_list, active_menu, 'Backup') }}
+    {{ generate_menu(menu_list, active_menu, 'Jobs') }}
     {% block menu_content %}
     {% endblock menu_content %}
 {% endblock tab_content %}

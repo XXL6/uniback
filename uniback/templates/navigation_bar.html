@@ -2,8 +2,9 @@
 
 {% set navigation_pills = [
     (url_for('main.home'), 'dashboard', 'Dashboard'),
-    (url_for('backup.job_queue'), 'backup', 'Backup'),
+    (url_for('backup.saved_jobs'), 'backup', 'Backup'),
     (url_for('restore.repositories'), 'restore', 'Restore'),
+    (url_for('jobs.job_queue'), 'jobs', 'Jobs'),
     (url_for('repositories.repository_list'), 'repositories', 'Repositories'),
     (url_for('settings.account'), 'settings', 'Settings')
 ] -%}
