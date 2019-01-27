@@ -1,6 +1,6 @@
 {% macro generate_menu(menu_item_list, active_menu, menu_header="Menu", sep=False) %}
 <div class="container-fluid menu-container col-md-2 float-left span2">
-    <ul class="nav flex-column nav-pills" id="v-pills-tab" aria-orientation="vertical">
+    <ul class="nav flex-column nav-pills mt-3" id="v-pills-tab" aria-orientation="vertical">
         {% for href, id, caption in menu_item_list %}
             <a class="nav-link menu-item {% if active_menu == id %}active{% endif %}" role="tab" href="{{ href }}">{{ caption }}</a>
         {% endfor %}

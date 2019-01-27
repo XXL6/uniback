@@ -2,11 +2,17 @@
 {% set active_tab = "settings" %}
 {% set menu_list = [
     (url_for('settings.account'), 'account', 'Account'),
-    (url_for('settings.system'), 'system', 'System')
+    (url_for('settings.system'), 'system', 'System'),
+    (url_for('settings.plugins'), 'plugins', 'Plugins')
 ] -%}
 {% from "menu_generator.html" import generate_menu %}
 {% block tab_content %}
     {{ generate_menu(menu_list, active_menu, 'Settings') }}
-    {% block menu_content %}
-    {% endblock menu_content %}
+    <div class="col-md-3 float-left">
+        {% block menu_content %}
+        {% endblock menu_content %}
+    </div>
+    <div class="col-md-8 float-left">
+        {{ render_flashed_messages() }}
+    </div>
 {% endblock tab_content %}

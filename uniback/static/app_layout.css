@@ -8,7 +8,6 @@
 .corner-title {
     background-color: #1C2833;
     display: inline-block;
-    border-right: 1px dashed #333;
     min-width: 140px;
 }
 
@@ -27,7 +26,6 @@
 }
 
 .menu-container {
-    border-right: 1px dashed #333;
     background-color: #273746;
     height: calc(100% - 56px);
 }
