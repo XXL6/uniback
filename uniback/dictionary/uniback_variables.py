@@ -1,0 +1,3 @@
+class System:
+    ENCRYPTED_CREDENTIALS = False
+    UNIBACK_INITIALIZED = False
