@@ -2,3 +2,9 @@ class JobStatus:
     JOB_STATUS_RUNNING = 0
     JOB_STATUS_QUEUED = 1
     JOB_STATUS_PAUSED = 2
+    JOB_STATUS_FINISHED = 3
+
+
+class BackupSetTypes:
+    BS_TYPE_FILESFOLDERS = 0
+    BS_TYPE_FILESFOLDERS_DESC = "Files and Folders"
