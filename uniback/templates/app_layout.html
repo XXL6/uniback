@@ -5,11 +5,19 @@
 {% import "navigation_bar.html" as navigation_bar %}
 <link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='app_layout.css') }}">
 <body>
-    <header class="app-header">
-        <nav class="navbar navbar-expand-md navbar-light bg-light">
+    <header class="corner-title col-md-2 float-left">
+        <h1>Uniback</h1>
+    </header>
+    <header class="app-header col-md-10 float-right">
+        <nav class="navbar navbar-expand-md navbar-light">
             <div class="container-fluid">
                 {{ navigation_bar.render_navigation_pills(navigation_bar.navigation_pills, active_tab) }}
-                <a class="nav-item nav-link col-md-1 offset-md-5" href="{{ url_for('users.logout') }}">Logout</a>
+
+                <div class="col-md-2 float-right">
+                    <a class="nav-item nav-link col-md-1 float-left" href="{{ url_for('settings.account') }}">{{ current_user.username }}</a>
+                    <a class="nav-item nav-link col-md-1 float-right" href="{{ url_for('users.logout') }}">Logout</a>
+                </div>
+
             </div>
         </nav>
     </header>
@@ -17,8 +25,5 @@
     {% block tab_content %}
     {% endblock tab_content%}
 
-    <div class="col-md-8">
-        {{ render_flashed_messages() }}
-    </div>
 </body>
 {% endblock app_content %}

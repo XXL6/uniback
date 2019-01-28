@@ -1,14 +1,23 @@
 .app-header {
-    color: #000000;
-    background-color: #ffffff;
+    color: #eeeeee;
+    background-color: #273746;
+    display: inline-block;
+    width: 100%;
+}
+
+.corner-title {
+    background-color: #1C2833;
+    display: inline-block;
+    min-width: 140px;
 }
 
 .navbar .nav-pills > li > a {
-    color: #005580;
+    color: #eeeeee;
 }
 
 .navbar .nav-pills > li > a:hover {
     background-color: #ffe0b2;
+    color: #111111;
 }
 
 .navbar .nav-pills .active > a {
@@ -17,15 +26,20 @@
 }
 
 .menu-container {
-    border-right: 1px dashed #333;
-    background-color: #ddddff;
-    min-height: 1000;
+    background-color: #273746;
+    height: calc(100% - 56px);
 }
 
-.menu-item .nav-link{
-    background-color: #c5cae9;
+#v-pills-tab {
+    color: #eeeeee;
 }
 
-.menu-item .nav-link .active{
+.menu-container .menu-item > a{
+    //background-color: #c5cae9;
+    background-color: #ffffff;
+    color: #eeeeee;
+}
+
+.menu-container .menu-item .active > a{
     background-color: #5c6bc0;
 }

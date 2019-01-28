@@ -1,6 +1,11 @@
 {% extends "app_layout.html" %}
 {% set active_tab = "restore" %}
+{% set menu_list = [
+    (url_for('restore.repositories'), 'repositories', 'Repositories')
+] -%}
+{% from "menu_generator.html" import generate_menu %}
 {% block tab_content %}
+    {{ generate_menu(menu_list, active_menu, 'Restore') }}
     {% block menu_content %}
     {% endblock menu_content %}
 {% endblock tab_content %}
