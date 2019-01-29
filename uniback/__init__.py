@@ -16,7 +16,9 @@ logger = logging.getLogger('mainLogger')
 
 
 def create_app(config_class=Config):
+
     app = Flask(__name__)
+    print(__name__)
     app.config.from_object(Config)
     from uniback.blueprints.main.routes import main
     from uniback.blueprints.jobs.routes import jobs

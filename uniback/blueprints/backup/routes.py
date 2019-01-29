@@ -12,5 +12,4 @@ def saved_jobs():
 
 @backup.route(f'/{backup.name}/job_history')
 def job_history():
-    logger.info('entered the job history page')
     return render_template('backup/job_history.html')

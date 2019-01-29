@@ -1,4 +1,4 @@
-#development config
+# development config
 
 
 class Config:

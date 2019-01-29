@@ -27,7 +27,8 @@
 
 .menu-container {
     background-color: #273746;
-    height: calc(100% - 56px);
+    height: calc(100vh - 56px);
+    //height: 100vh;
 }
 
 #v-pills-tab {
@@ -43,3 +44,21 @@
 .menu-container .menu-item .active > a{
     background-color: #5c6bc0;
 }
+/*
+.wrapper {
+    display: flex;
+    width: 100%;
+    align-items: stretch;
+}
+
+#sidebar {
+    min-width: 250px;
+    max-width: 250px;
+    min-height: calc(100vh - 56px);
+}
+
+#sidebar.active {
+    margin-right: -250px;
+    overflow: hidden;
+}
+*/

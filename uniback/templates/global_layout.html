@@ -11,10 +11,11 @@
     <link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='bootstrap.css') }}">
     <link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='global.css') }}">
 </head>
+<script src="{{ url_for('static', filename='jquery.js') }}"></script>
+<script src="{{ url_for('static', filename='bootstrap.js') }}"></script>
 
 {% block app_content %}
 {% endblock app_content %}
 
-<script src="{{ url_for('static', filename='jquery.js') }}"></script>
-<script src="{{ url_for('static', filename='bootstrap.js') }}"></script>
+
 </html>

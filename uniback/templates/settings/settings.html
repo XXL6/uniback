@@ -3,16 +3,20 @@
 {% set menu_list = [
     (url_for('settings.account'), 'account', 'Account'),
     (url_for('settings.system'), 'system', 'System'),
-    (url_for('settings.plugins'), 'plugins', 'Plugins')
+    (url_for('settings.plugins'), 'plugins', 'Plugins'),
+    (url_for('settings.credentials'), 'credentials', 'Credentials')
 ] -%}
-{% from "menu_generator.html" import generate_menu %}
+{% from "menu_generator.html" import generate_menu, generate_sidebar %}
 {% block tab_content %}
     {{ generate_menu(menu_list, active_menu, 'Settings') }}
-    <div class="col-md-3 float-left">
-        {% block menu_content %}
-        {% endblock menu_content %}
-    </div>
-    <div class="col-md-8 float-left">
-        {{ render_flashed_messages() }}
-    </div>
+    <!--<div class="wrapper">-->
+        <div class="col-md-7 float-left">
+            {% block menu_content %}
+            {% endblock menu_content %}
+        </div>
+        {{ generate_sidebar() }}
+        <div class="col-md-8 float-left">
+            {{ render_flashed_messages() }}
+        </div>
+    <!--</div>-->
 {% endblock tab_content %}

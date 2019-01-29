@@ -1,7 +1,7 @@
 {% extends "settings/settings.html" %}
 {% set active_menu = "account" %}
 {% block menu_content %}
-    <form method="POST" action="" enctype="multipart/form-data"><!-- enctype required for images or something -->
+    <form class="col-md-4" method="POST" action="" enctype="multipart/form-data"><!-- enctype required for images or something -->
         {{ form.hidden_tag() }}
         <fieldset class="form-group">
             <legend class="border-bottom">Account Info</legend>
