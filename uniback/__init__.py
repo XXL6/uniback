@@ -3,13 +3,16 @@ from flask_sqlalchemy import SQLAlchemy
 from uniback.config import Config
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager
-
+import logging
+from uniback import ub_logging
 
 db = SQLAlchemy()
 bcrypt = Bcrypt()
 login_manager = LoginManager()
 login_manager.login_view = 'users.login'
 login_manager.login_message_category = 'info'
+ub_logging.initialize_logging()
+logger = logging.getLogger('mainLogger')
 
 
 def create_app(config_class=Config):
@@ -34,5 +37,5 @@ def create_app(config_class=Config):
     bcrypt.init_app(app)
     with app.app_context():
         db.create_all()
-
+    logger.info('App created ayy lmao')
     return app

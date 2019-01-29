@@ -11,7 +11,7 @@ flask-login = "*"
 flask-sqlalchemy = "*"
 flask-bcrypt = "*"
 wtforms = "*"
-flask-wtf = "*"
 
+flask-wtf = "*"
 [requires]
 python_version = "3.7"
