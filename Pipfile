@@ -4,6 +4,7 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
+pylint = "*"
 
 [packages]
 flask = "*"
@@ -11,7 +12,8 @@ flask-login = "*"
 flask-sqlalchemy = "*"
 flask-bcrypt = "*"
 wtforms = "*"
-
 flask-wtf = "*"
+pycryptodome = "*"
+
 [requires]
 python_version = "3.7"

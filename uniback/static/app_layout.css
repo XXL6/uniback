@@ -28,7 +28,7 @@
 .menu-container {
     background-color: #273746;
     height: calc(100vh - 56px);
-    //height: 100vh;
+    /*height: 100vh;*/
 }
 
 #v-pills-tab {
@@ -36,14 +36,15 @@
 }
 
 .menu-container .menu-item > a{
-    //background-color: #c5cae9;
+    /*background-color: #c5cae9;*/
     background-color: #ffffff;
     color: #eeeeee;
 }
 
-.menu-container .menu-item .active > a{
+.menu-container .menu-item .active > a {
     background-color: #5c6bc0;
 }
+
 /*
 .wrapper {
     display: flex;
