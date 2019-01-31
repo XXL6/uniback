@@ -1,7 +1,7 @@
 from os import environ
-from uniback.models.system import CredentialStore, SysVars
-from uniback.dictionary.uniback_variables import System
-from uniback import db
+from uniback.models.system import CredentialStore, SysVars, CredentialGroup
+from uniback.dictionary.uniback_variables import Credential
+from uniback import db, bcrypt
 from Crypto.Cipher import AES
 from flask import current_app as app
 import logging
@@ -9,26 +9,23 @@ import logging
 logging.getLogger('mainLogger')
 
 
-def get_credential(_credential_role, _reference_id, _service_name=""):
+def get_credential(group_id, credential_role, service_name=""):
     if credentials_encrypted() and credentials_locked():
-        logging.error(f'Could not get credential data for role={_credential_role} \
-                        service={_service_name} as the \
+        logging.error(f'Could not get credential data for role={credential_role} \
+                        service={service_name} as the \
                         credential store is encrypted and locked')
         raise Exception("Database locked.")
     with app.app_context():
         credential = CredentialStore.query.filter_by(
-                                            credential_role=_credential_role,
-                                            reference_id=_reference_id).first()
+                                            credential_role=credential_role,
+                                            group_id=group_id).first()
     if credentials_encrypted():
-        decryption_key = environ.get(
-                                System.CREDENTIAL_ENVIRONMENT_VAR_NAME)
+        decryption_key = get_crypt_key()
         if decryption_key is None:
             logging.error(f'Credential database marked as \
                             unlocked but no key provided')
             raise Exception("No password specified for credential store")
-        obj = AES.new(decryption_key, AES.MODE_CFB)
-        decrypted_credential = obj.decrypt(credential.credential_data)
-        return decrypted_credential
+        decrypt_string(credential.credential_data, get_crypt_key())
     return credential.credential_data
 
 
@@ -46,19 +43,19 @@ def credentials_locked():
     return locked.var_data == '1'
 
 
-def set_credentials_encrypted(_set_encrypted):
+def set_credentials_encrypted(set_encrypted):
     with app.app_context():
         encrypted = SysVars.query.filter_by(
             var_name="CREDENTIAL_DATABASE_ENCRYPTED").first()
-        encrypted.var_data = '1' if _set_encrypted else '0'
+        encrypted.var_data = '1' if set_encrypted else '0'
         db.session.commit()
 
 
-def set_credentials_locked(_set_locked):
+def set_credentials_locked(set_locked):
     with app.app_context():
         locked = SysVars.query.filter_by(
             var_name="CREDENTIAL_DATABASE_LOCKED").first()
-        locked.var_data = '1' if _set_locked else '0'
+        locked.var_data = '1' if set_locked else '0'
         db.session.commit()
 
 
@@ -68,4 +65,137 @@ def encrypt_credentials(encryption_key):
                         however, the database is already encrypted or locked")
         raise("Can't encrypt an encrypted database")
     with app.app_context():
-        credential_list = CredentialStore.query.filter(CredentialStore.reference_id > 0)
+        try:
+            # we do not encrypt group_id of 0 as that's the built-in group
+            # to check the validity of encryption password
+            credential_list = CredentialStore.query.filter(
+                CredentialStore.group_id > 0)
+        except Exception as e:
+            logging.error(f"Failure to query credential database. {e}")
+            raise
+        for instance in credential_list:
+            encrypted_credential = encrypt_string(
+                instance.credential_data, encryption_key)
+            instance.credential_data = encrypted_credential
+        try:
+            db.session.commit()
+        except Exception as e:
+            logging.error(
+                f"Failure to commit encrypted credential changes. {e}")
+            raise
+    set_crypt_key(encryption_key)
+    # once all the checks complete we can conclude that the database
+    # is now encrypted
+    set_credentials_encrypted(True)
+
+
+def decrypt_credentials(encryption_key):
+    with app.app_context():
+        try:
+            # we do not decrypt group_id of 0 as that's the built-in group
+            # to check the validity of encryption password
+            credential_list = CredentialStore.query.filter(
+                CredentialStore.group_id > 0)
+        except Exception as e:
+            logging.error(f"Failure to query credential database. {e}")
+            raise
+        for instance in credential_list:
+            decrypted_credential = decrypt_string(
+                instance.credential_data, encryption_key)
+            instance.credential_data = decrypted_credential
+        try:
+            db.session.commit()
+        except Exception as e:
+            logging.error(
+                f"Failure to commit decrypted credential changes. {e}")
+            raise
+    # once all the checks complete we can conclude that the database
+    # is now decrypted
+    set_credentials_encrypted(False)
+
+
+def lock_credentials():
+    try:
+        environ.unsetenv(Credential.CREDENTIAL_ENVIRONMENT_VAR_NAME)
+    except Exception as e:
+        logging.error(f'Failed to lock credentials.')
+        raise e
+    set_credentials_locked(False)
+
+
+def unlock_credentials(key):
+    try:
+        hashed_key = CredentialStore.query.filter_by(
+            group_id=0).first().credential_data
+    except Exception as e:
+        logging.error(f"Failure to query credential database \
+            while unlocking credentials.")
+        raise e
+    if not bcrypt.check_password_hash(hashed_key, key):
+        logging.error(f"Wrong password provided for credential unlocking")
+        raise
+    set_crypt_key(key)
+
+
+def get_crypt_key():
+    return environ.get(Credential.CREDENTIAL_ENVIRONMENT_VAR_NAME)
+
+
+def set_crypt_key(key):
+    environ[Credential.CREDENTIAL_ENVIRONMENT_VAR_NAME] = key
+
+
+def store_crypt_key(key):
+    with app.app_context():
+        try:
+            credential = CredentialStore.query.filter_by(
+                        credential_role=Credential.CREDENTIAL_KEY_ROLE_NAME,
+                        group_id=Credential.CREDENTIAL_KEY_GROUP_NAME).first()
+        except Exception as e:
+            logging.error(f"Failure to query credential database \
+                while storing cryptographic key.")
+            raise e
+        try:
+            credential_group = CredentialGroup.query.filter_by(
+                        id=0).first()
+        except Exception as e:
+            logging.error(f"Failure to query credential database \
+                while storing cryptographic key.")
+            raise e
+        if credential_group and credential_group.description != \
+                Credential.CREDENTIAL_KEY_GROUP_NAME:
+            logging.error(f"Wrong item in id=0 location of the \
+                credential group table.")
+            raise
+        else:
+            new_credential_group = CredentialGroup(
+                id=0,
+                description=Credential.CREDENTIAL_KEY_GROUP_NAME)
+            try:
+                db.session.add(new_credential_group)
+            except Exception as e:
+                logging.error(f"Failure to add new credential group \
+                    to the database.")
+                raise e
+        if not credential:
+            new_credential = CredentialStore(
+                group_id=0,
+                service_name=Credential.CREDENTIAL_KEY_GROUP_NAME,
+                credential_role=Credential.CREDENTIAL_KEY_ROLE_NAME,
+                credential_data=bcrypt.generate_password_hash(key))
+            try:
+                db.session.add(new_credential)
+            except Exception as e:
+                logging.error(f"Failure to add the credential password \
+                    hash to the credential database.")
+                raise e
+
+
+def encrypt_string(input_string, key):
+    enc = AES.new(key, AES.MODE_CFB)
+    return enc.encrypt(input_string)
+
+
+def decrypt_string(input_string, key):
+    enc = AES.new(key, AES.MODE_CFB)
+    return enc.decrypt(input_string)

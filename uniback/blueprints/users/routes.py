@@ -1,13 +1,13 @@
 from flask import Blueprint, redirect, url_for, flash, render_template
-from flask_login import login_user, current_user, logout_user, login_required
+from flask_login import login_user, current_user, logout_user
 from uniback.blueprints.users.forms import LoginForm
 from uniback.blueprints.users.models import User
-from uniback import bcrypt, db
+from uniback import bcrypt
 
 users = Blueprint('users', '__name__')
 
-#commented out during development
-#@users.route('/', methods=['GET', 'POST'])
+# commented out during development
+# @users.route('/', methods=['GET', 'POST'])
 @users.route('/login', methods={'GET', 'POST'})
 def login():
     if current_user.is_authenticated:
@@ -15,7 +15,9 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
-        if user and bcrypt.check_password_hash(user.password, form.password.data):
+        if user and bcrypt.check_password_hash(
+                user.password,
+                form.password.data):
             login_user(user, remember=form.remember_me.data)
             return redirect(url_for('main.home'))
         else:
@@ -27,4 +29,3 @@ def login():
 def logout():
     logout_user()
     return redirect(url_for('users.login'))
-

@@ -7,7 +7,10 @@ class SavedJobs(db.Model):
     id = db.Column(db.Integer, primary_key=True, nullable=False)
     name = db.Column(db.String, nullable=False, unique=True)
     engine = db.Column(db.Integer, db.ForeignKey('engine.id'), nullable=False)
-    time_added = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    time_added = db.Column(
+        db.DateTime,
+        nullable=False,
+        default=datetime.utcnow)
 
 
 class BackupJobQueue(db.Model):
@@ -17,7 +20,10 @@ class BackupJobQueue(db.Model):
     engine = db.Column(db.Integer, db.ForeignKey('engine.id'), nullable=False)
     status = db.Column(db.Integer, nullable=False)
     time_started = db.Column(db.DateTime, nullable=False)
-    time_added = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    time_added = db.Column(
+        db.DateTime,
+        nullable=False,
+        default=datetime.utcnow)
 
 
 class Repository(db.Model):
@@ -25,19 +31,31 @@ class Repository(db.Model):
     id = db.Column(db.Integer, primary_key=True, nullable=False)
     name = db.Column(db.String(50), nullable=False, unique=True)
     engine = db.Column(db.Integer, db.ForeignKey('engine.id'), nullable=False)
-    time_added = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    time_added = db.Column(
+        db.DateTime,
+        nullable=False,
+        default=datetime.utcnow)
 
 
 class Engine(db.Model):
     __bind_key__ = 'backup'
     id = db.Column(db.Integer, primary_key=True, nullable=False)
     name = db.Column(db.String(50), nullable=False, unique=True)
-    time_added = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    time_added = db.Column(
+        db.DateTime,
+        nullable=False,
+        default=datetime.utcnow)
 
 
 class PhysicalLocation(db.Model):
     __bind_key__ = 'backup'
     id = db.Column(db.Integer, primary_key=True, nullable=False)
     name = db.Column(db.String(50), nullable=False, unique=True)
-    repositories = db.relationship('Repository', backref='PhysicalLocation', lazy=True)
-    time_added = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    repositories = db.relationship(
+        'Repository',
+        backref='PhysicalLocation',
+        lazy=True)
+    time_added = db.Column(
+        db.DateTime,
+        nullable=False,
+        default=datetime.utcnow)
