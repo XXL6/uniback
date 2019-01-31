@@ -20,7 +20,8 @@ class UserFacingLog(db.Model):
 class CredentialStore(db.Model):
     __bind_key__ = 'system'
     id = db.Column(db.Integer, primary_key=True)
-    reference_id = db.Column(db.Integer)
+    group_id = db.Column(
+        db.Integer, db.ForeignKey('CredentialGroup.id'), nullable=False)
     service_name = db.Column(db.String, nullable=False)
     credential_role = db.Column(db.String(100), nullable=False)
     credential_data = db.Column(db.String(100), nullable=False)
@@ -28,3 +29,11 @@ class CredentialStore(db.Model):
                         db.DateTime,
                         nullable=False,
                         default=datetime.utcnow)
+
+
+class CredentialGroup(db.Model):
+    __bind_key__ = 'system'
+    id = db.Column(db.Integer, primary_key=True)
+    credentials = db.Relationship(
+        'CredentialStore', backref='credential_group', lazy=True)
+    description = db.Column(db.String(100))
