@@ -1,6 +1,8 @@
 from os import environ
 from uniback.models.system import CredentialStore, SysVars, CredentialGroup
 from uniback.dictionary.uniback_variables import Credential
+from uniback.dictionary.uniback_exceptions import DbGeneralException
+from sqlalchemy import exc
 from uniback import db, bcrypt
 from Crypto.Cipher import AES
 from flask import current_app as app
@@ -9,12 +11,11 @@ import logging
 logging.getLogger('mainLogger')
 
 
-def get_credential(group_id, credential_role, service_name=""):
+def get_credential(group_id, credential_role):
     if credentials_encrypted() and credentials_locked():
         logging.error(f'Could not get credential data for role={credential_role} \
-                        service={service_name} as the \
                         credential store is encrypted and locked')
-        raise Exception("Database locked.")
+        raise DbGeneralException("Database locked.")
     with app.app_context():
         credential = CredentialStore.query.filter_by(
                                             credential_role=credential_role,
@@ -63,14 +64,14 @@ def encrypt_credentials(encryption_key):
     if credentials_encrypted() or credentials_locked():
         logging.error("Credential database encryption was attempted, \
                         however, the database is already encrypted or locked")
-        raise("Can't encrypt an encrypted database")
+        raise Exception("Can't encrypt an encrypted database")
     with app.app_context():
         try:
             # we do not encrypt group_id of 0 as that's the built-in group
             # to check the validity of encryption password
             credential_list = CredentialStore.query.filter(
                 CredentialStore.group_id > 0)
-        except Exception as e:
+        except exc.SQLAlchemyError as e:
             logging.error(f"Failure to query credential database. {e}")
             raise
         for instance in credential_list:
@@ -96,19 +97,25 @@ def decrypt_credentials(encryption_key):
             # to check the validity of encryption password
             credential_list = CredentialStore.query.filter(
                 CredentialStore.group_id > 0)
-        except Exception as e:
-            logging.error(f"Failure to query credential database. {e}")
-            raise
+        except exc.InvalidRequestError as e:
+            logging.error(f"Failure to query credential database.")
+            raise e
+        except exc.SQLAlchemyError as e:
+            logging.error(f"General DB error.")
+            raise e
         for instance in credential_list:
             decrypted_credential = decrypt_string(
                 instance.credential_data, encryption_key)
             instance.credential_data = decrypted_credential
         try:
             db.session.commit()
-        except Exception as e:
+        except exc.InvalidRequestError as e:
             logging.error(
-                f"Failure to commit decrypted credential changes. {e}")
-            raise
+                f"Failure to commit decrypted credential changes.")
+            raise e
+        except exc.SQLAlchemyError as e:
+            logging.error(f"General DB error.")
+            raise e
     # once all the checks complete we can conclude that the database
     # is now decrypted
     set_credentials_encrypted(False)
@@ -141,26 +148,37 @@ def get_crypt_key():
     return environ.get(Credential.CREDENTIAL_ENVIRONMENT_VAR_NAME)
 
 
+# method used to store the user's cryptographic key for later use
+# can be changed if environmental variables are not wanted
 def set_crypt_key(key):
     environ[Credential.CREDENTIAL_ENVIRONMENT_VAR_NAME] = key
 
 
+# stores and encrypts they key in the database using bcrypt
+# this way we can see whether the user input the right key
+# to unlock the database. 
 def store_crypt_key(key):
     with app.app_context():
         try:
             credential = CredentialStore.query.filter_by(
                         credential_role=Credential.CREDENTIAL_KEY_ROLE_NAME,
                         group_id=Credential.CREDENTIAL_KEY_GROUP_NAME).first()
-        except Exception as e:
+        except exc.InvalidRequestError as e:
             logging.error(f"Failure to query credential database \
                 while storing cryptographic key.")
+            raise e
+        except exc.SQLAlchemyError as e:
+            logging.error("General DB error.")
             raise e
         try:
             credential_group = CredentialGroup.query.filter_by(
                         id=0).first()
-        except Exception as e:
+        except exc.InvalidRequestError as e:
             logging.error(f"Failure to query credential database \
                 while storing cryptographic key.")
+            raise e
+        except exc.SQLAlchemyError as e:
+            logging.error("General DB error.")
             raise e
         if credential_group and credential_group.description != \
                 Credential.CREDENTIAL_KEY_GROUP_NAME:
@@ -173,9 +191,12 @@ def store_crypt_key(key):
                 description=Credential.CREDENTIAL_KEY_GROUP_NAME)
             try:
                 db.session.add(new_credential_group)
-            except Exception as e:
+            except exc.InvalidRequestError as e:
                 logging.error(f"Failure to add new credential group \
                     to the database.")
+                raise e
+            except exc.SQLAlchemyError as e:
+                logging.error("General DB error.")
                 raise e
         if not credential:
             new_credential = CredentialStore(
@@ -185,9 +206,12 @@ def store_crypt_key(key):
                 credential_data=bcrypt.generate_password_hash(key))
             try:
                 db.session.add(new_credential)
-            except Exception as e:
+            except exc.InvalidRequestError as e:
                 logging.error(f"Failure to add the credential password \
                     hash to the credential database.")
+                raise e
+            except exc.SQLAlchemyError as e:
+                logging.error("General DB error.")
                 raise e
 
 
@@ -199,3 +223,37 @@ def encrypt_string(input_string, key):
 def decrypt_string(input_string, key):
     enc = AES.new(key, AES.MODE_CFB)
     return enc.decrypt(input_string)
+
+
+# removes all credential keys and groups
+# essentially has to be done if user encrypts
+# their database and forgets their password
+def reset_database():
+    with app.app_context():
+        try:
+            credentials_deleted = CredentialStore.query.filter(
+                CredentialStore.group_id > 0).\
+                delete(synchronize_session=False)
+        except exc.InvalidRequestError as e:
+            logging.error(f"Failed to delete CredentialStore entries.")
+            raise e
+        except exc.SQLAlchemyError as e:
+            logging.error("General DB error.")
+            raise e
+        try:
+            credential_group_deleted = CredentialGroup.query.filter(
+                CredentialGroup.id > 0).\
+                delete(synchronize_session=False)
+        except exc.InvalidRequestError as e:
+            logging.error(f"Failed to reset CredentialGroup database.")
+            raise e
+        except exc.SQLAlchemyError as e:
+            logging.error("General DB error.")
+            raise e
+        logging.info(f"[{credentials_deleted}] credentials deleted and \
+            [{credential_group_deleted}] credential groups deleted. ")
+    set_credentials_encrypted(False)
+    set_credentials_locked(False)
+    set_crypt_key("")
+    store_crypt_key("")
+

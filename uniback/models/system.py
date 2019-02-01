@@ -22,13 +22,8 @@ class CredentialStore(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     group_id = db.Column(
         db.Integer, db.ForeignKey('CredentialGroup.id'), nullable=False)
-    service_name = db.Column(db.String, nullable=False)
     credential_role = db.Column(db.String(100), nullable=False)
     credential_data = db.Column(db.String(100))
-    time_added = db.Column(
-                        db.DateTime,
-                        nullable=False,
-                        default=datetime.utcnow)
 
 
 class CredentialGroup(db.Model):
@@ -37,3 +32,8 @@ class CredentialGroup(db.Model):
     credentials = db.Relationship(
         'CredentialStore', backref='credential_group', lazy=True)
     description = db.Column(db.String(100))
+    service_name = db.Column(db.String(50), nullable=False)
+    time_added = db.Column(
+                        db.DateTime,
+                        nullable=False,
+                        default=datetime.utcnow)
