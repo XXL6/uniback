@@ -29,7 +29,7 @@ class CredentialStore(db.Model):
 class CredentialGroup(db.Model):
     __bind_key__ = 'system'
     id = db.Column(db.Integer, primary_key=True)
-    credentials = db.Relationship(
+    credentials = db.relationship(
         'CredentialStore', backref='credential_group', lazy=True)
     description = db.Column(db.String(100))
     service_name = db.Column(db.String(50), nullable=False)

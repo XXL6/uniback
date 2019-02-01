@@ -257,3 +257,25 @@ def reset_database():
     set_crypt_key("")
     store_crypt_key("")
 
+
+def add_credential(service_name, credential_role, credential_data):
+    with app.app_context():
+        try:
+            credential_group = CredentialGroup.query.filter_by(
+                service_name=service_name)
+        except exc.InvalidRequestError as e:
+            logging.error("Failed to query credential group database \
+                while adding new credential.")
+            raise e
+        except exc.SQLAlchemyError as e:
+            logging.error("General DB error.")
+            raise e
+        if credential_group:
+            group_id = credential_group.id
+        else:
+            credential_group = CredentialGroup(service_name=service_name)
+            db.session.add(credential_group)
+        new_credential = CredentialStore(
+            credential_role=credential_role,
+            credential_data=credential_data,
+            group_id=group_id)
