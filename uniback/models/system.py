@@ -21,7 +21,7 @@ class CredentialStore(db.Model):
     __bind_key__ = 'system'
     id = db.Column(db.Integer, primary_key=True)
     group_id = db.Column(
-        db.Integer, db.ForeignKey('CredentialGroup.id'), nullable=False)
+        db.Integer, db.ForeignKey('credential_group.id'), nullable=False)
     credential_role = db.Column(db.String(100), nullable=False)
     credential_data = db.Column(db.String(100))
 

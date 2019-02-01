@@ -156,7 +156,7 @@ def set_crypt_key(key):
 
 # stores and encrypts they key in the database using bcrypt
 # this way we can see whether the user input the right key
-# to unlock the database. 
+# to unlock the database.
 def store_crypt_key(key):
     with app.app_context():
         try:
@@ -275,7 +275,11 @@ def add_credential(service_name, credential_role, credential_data):
         else:
             credential_group = CredentialGroup(service_name=service_name)
             db.session.add(credential_group)
+            db.session.commit()
+            group_id = credential_group.id
         new_credential = CredentialStore(
             credential_role=credential_role,
             credential_data=credential_data,
             group_id=group_id)
+        db.session.add(new_credential)
+        db.session.commit()
