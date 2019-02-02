@@ -4,6 +4,7 @@ from uniback import db
 
 class SysVars(db.Model):
     __bind_key__ = 'system'
+    __tablename__ = 'sys_vars'
     id = db.Column(db.Integer, primary_key=True)
     # JSON might be better but SQLite doesn't seem to support it
     var_name = db.Column(db.String(100), nullable=False)
@@ -12,6 +13,7 @@ class SysVars(db.Model):
 
 class UserFacingLog(db.Model):
     __bind_key__ = 'system'
+    __tablename__ = 'user_facing_log'
     id = db.Column(db.Integer, primary_key=True)
     log_level = db.Column(db.Integer, nullable=False)
     message = db.Column(db.String, nullable=True)
@@ -19,6 +21,7 @@ class UserFacingLog(db.Model):
 
 class CredentialStore(db.Model):
     __bind_key__ = 'system'
+    __tablename__ = 'credential_store'
     id = db.Column(db.Integer, primary_key=True)
     group_id = db.Column(
         db.Integer, db.ForeignKey('credential_group.id'), nullable=False)
@@ -28,6 +31,7 @@ class CredentialStore(db.Model):
 
 class CredentialGroup(db.Model):
     __bind_key__ = 'system'
+    __tablename__ = 'credential_group'
     id = db.Column(db.Integer, primary_key=True)
     credentials = db.relationship(
         'CredentialStore', backref='credential_group', lazy=True)

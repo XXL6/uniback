@@ -1,7 +1,7 @@
 from os import environ
 from uniback.models.system import CredentialStore, SysVars, CredentialGroup
 from uniback.dictionary.uniback_variables import Credential
-from uniback.dictionary.uniback_exceptions import DbGeneralException
+from uniback.dictionary.uniback_exceptions import CredentialsLockedException
 from sqlalchemy import exc
 from uniback import db, bcrypt
 from Crypto.Cipher import AES
@@ -15,7 +15,7 @@ def get_credential(group_id, credential_role):
     if credentials_encrypted() and credentials_locked():
         logging.error(f'Could not get credential data for role={credential_role} \
                         credential store is encrypted and locked')
-        raise DbGeneralException("Database locked.")
+        raise CredentialsLockedException
     with app.app_context():
         credential = CredentialStore.query.filter_by(
                                             credential_role=credential_role,
@@ -64,7 +64,7 @@ def encrypt_credentials(encryption_key):
     if credentials_encrypted() or credentials_locked():
         logging.error("Credential database encryption was attempted, \
                         however, the database is already encrypted or locked")
-        raise Exception("Can't encrypt an encrypted database")
+        raise CredentialsLockedException
     with app.app_context():
         try:
             # we do not encrypt group_id of 0 as that's the built-in group
@@ -234,6 +234,7 @@ def reset_database():
             credentials_deleted = CredentialStore.query.filter(
                 CredentialStore.group_id > 0).\
                 delete(synchronize_session=False)
+            db.session.commit()
         except exc.InvalidRequestError as e:
             logging.error(f"Failed to delete CredentialStore entries.")
             raise e
@@ -244,6 +245,7 @@ def reset_database():
             credential_group_deleted = CredentialGroup.query.filter(
                 CredentialGroup.id > 0).\
                 delete(synchronize_session=False)
+            db.session.commit()
         except exc.InvalidRequestError as e:
             logging.error(f"Failed to reset CredentialGroup database.")
             raise e
@@ -259,6 +261,11 @@ def reset_database():
 
 
 def add_credential(service_name, credential_role, credential_data):
+    if credentials_locked():
+        logging.error(f"Unable to add [{credential_role}] \
+            for [{service_name}] as the credential database \
+                is locked")
+        raise CredentialsLockedException
     with app.app_context():
         try:
             credential_group = CredentialGroup.query.filter_by(
@@ -281,5 +288,44 @@ def add_credential(service_name, credential_role, credential_data):
             credential_role=credential_role,
             credential_data=credential_data,
             group_id=group_id)
+        if credentials_encrypted():
+            new_credential.credential_data = encrypt_string(
+                new_credential.credential_data,
+                get_crypt_key()
+            )
         db.session.add(new_credential)
+        db.session.commit()
+    return group_id
+
+
+def remove_credentials(group_id):
+    with app.app_context():
+        credentials_deleted = CredentialStore.query().filter_by(
+            group_id=group_id).delete(synchronize_session=False)
+        credential_group = CredentialGroup.query.filter_by(
+            group_id=group_id).delete(synchronize_session=False)
+        db.session.commit()
+    if credentials_deleted > 0:
+        logging.info(f"{credentials_deleted} credentials \
+            with group id of {group_id}")
+    else:
+        logging.warning(f"No credentials have been deleted for \
+            group id of {group_id}")
+    if credential_group > 0:
+        logging.info(f"Credential group with id {group_id} \
+            has been deleted.")
+    else:
+        logging.warning(f"No credential groups with id {group_id} \
+            have been deleted.")
+
+
+def add_group_description(group_id, description):
+    with app.app_context():
+        credential_group = CredentialGroup.query.filter_by(
+            id=group_id
+        )
+        if not credential_group:
+            logging.error(f"Unable to add description to group {group_id}")
+            raise Exception
+        credential_group.description = description
         db.session.commit()

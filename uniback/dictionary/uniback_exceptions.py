@@ -8,3 +8,7 @@ class DbQueryException(Exception):
 
 class DbGeneralException(Exception):
     pass
+
+
+class CredentialsLockedException(Exception):
+    pass
