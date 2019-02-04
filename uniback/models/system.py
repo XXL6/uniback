@@ -11,14 +11,6 @@ class SysVars(db.Model):
     var_data = db.Column(db.String(100), nullable=True)
 
 
-class UserFacingLog(db.Model):
-    __bind_key__ = 'system'
-    __tablename__ = 'user_facing_log'
-    id = db.Column(db.Integer, primary_key=True)
-    log_level = db.Column(db.Integer, nullable=False)
-    message = db.Column(db.String, nullable=True)
-
-
 class CredentialStore(db.Model):
     __bind_key__ = 'system'
     __tablename__ = 'credential_store'

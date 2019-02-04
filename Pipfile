@@ -15,6 +15,7 @@ flask-bcrypt = "*"
 wtforms = "*"
 flask-wtf = "*"
 pycryptodome = "*"
+pywin32 = "*"
 
 [requires]
 python_version = "3.7"

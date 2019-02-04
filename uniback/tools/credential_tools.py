@@ -90,37 +90,51 @@ def encrypt_credentials(encryption_key):
     set_credentials_encrypted(True)
 
 
-def decrypt_credentials(encryption_key):
-    with app.app_context():
-        try:
-            # we do not decrypt group_id of 0 as that's the built-in group
-            # to check the validity of encryption password
-            credential_list = CredentialStore.query.filter(
-                CredentialStore.group_id > 0)
-        except exc.InvalidRequestError as e:
-            logging.error(f"Failure to query credential database.")
-            raise e
-        except exc.SQLAlchemyError as e:
-            logging.error(f"General DB error.")
-            raise e
-        for instance in credential_list:
-            decrypted_credential = decrypt_string(
-                instance.credential_data, encryption_key)
-            instance.credential_data = decrypted_credential
-        try:
-            db.session.commit()
-        except exc.InvalidRequestError as e:
-            logging.error(
-                f"Failure to commit decrypted credential changes.")
-            raise e
-        except exc.SQLAlchemyError as e:
-            logging.error(f"General DB error.")
-            raise e
-    # once all the checks complete we can conclude that the database
-    # is now decrypted
-    set_credentials_encrypted(False)
+# using the saved crypto key we decrypt all the credential_data
+# objects permanently and clear the old key from memory and
+# the database
+def decrypt_credentials():
+    if credentials_locked():
+        logging.error("Cannot decrypt credentials as the database \
+            is locked.")
+        raise CredentialsLockedException
+    else:
+        decryption_key = get_crypt_key()
+        with app.app_context():
+            try:
+                # we do not decrypt group_id of 0 as that's the built-in group
+                # to check the validity of encryption password
+                credential_list = CredentialStore.query.filter(
+                    CredentialStore.group_id > 0)
+            except exc.InvalidRequestError as e:
+                logging.error(f"Failure to query credential database.")
+                raise e
+            except exc.SQLAlchemyError as e:
+                logging.error(f"General DB error.")
+                raise e
+            for instance in credential_list:
+                decrypted_credential = decrypt_string(
+                    instance.credential_data, decryption_key)
+                instance.credential_data = decrypted_credential
+            try:
+                db.session.commit()
+            except exc.InvalidRequestError as e:
+                logging.error(
+                    f"Failure to commit decrypted credential changes.")
+                raise e
+            except exc.SQLAlchemyError as e:
+                logging.error(f"General DB error.")
+                raise e
+        set_crypt_key("")
+        store_crypt_key("")
+        # once all the checks complete we can conclude that the database
+        # is now decrypted
+        set_credentials_encrypted(False)
 
 
+# Basically if the encryption/decryption key is not currently set
+# the database is considered to be locked as the credential data
+# can no longer be decrypted on the fly
 def lock_credentials():
     try:
         environ.unsetenv(Credential.CREDENTIAL_ENVIRONMENT_VAR_NAME)
@@ -162,7 +176,7 @@ def store_crypt_key(key):
         try:
             credential = CredentialStore.query.filter_by(
                         credential_role=Credential.CREDENTIAL_KEY_ROLE_NAME,
-                        group_id=Credential.CREDENTIAL_KEY_GROUP_NAME).first()
+                        group_id=0).first()
         except exc.InvalidRequestError as e:
             logging.error(f"Failure to query credential database \
                 while storing cryptographic key.")
@@ -213,6 +227,7 @@ def store_crypt_key(key):
             except exc.SQLAlchemyError as e:
                 logging.error("General DB error.")
                 raise e
+        db.session.commit()
 
 
 def encrypt_string(input_string, key):
@@ -260,6 +275,13 @@ def reset_database():
     store_crypt_key("")
 
 
+# add a singular credential into the database
+# looks for a credential group with the specified
+# service name and assigns that group to the newly
+# added credential.
+# if it can't find the group with the specified
+# service name, it adds the group and then uses the newly
+# created group's id to create the credential
 def add_credential(service_name, credential_role, credential_data):
     if credentials_locked():
         logging.error(f"Unable to add [{credential_role}] \
@@ -298,6 +320,8 @@ def add_credential(service_name, credential_role, credential_data):
     return group_id
 
 
+# Removes all credentials belonging to a certain group including
+# the group itself
 def remove_credentials(group_id):
     with app.app_context():
         credentials_deleted = CredentialStore.query().filter_by(
@@ -319,13 +343,14 @@ def remove_credentials(group_id):
             have been deleted.")
 
 
-def add_group_description(group_id, description):
+# sets a description to a credential group
+def set_group_description(group_id, description):
     with app.app_context():
         credential_group = CredentialGroup.query.filter_by(
             id=group_id
         )
         if not credential_group:
-            logging.error(f"Unable to add description to group {group_id}")
+            logging.error(f"Unable to set description to group {group_id}")
             raise Exception
         credential_group.description = description
         db.session.commit()
