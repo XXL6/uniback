@@ -1,0 +1,27 @@
+import re
+
+
+class Progress:
+    
+
+    def get_current_progress(self):
+        return self.current_progress
+
+
+    def set_regex(self, regex):
+        self.regex = regex
+
+
+    def parse_progress(self, input_string):
+        # we use regex to try and parse out the potential progress strings
+        # that might show up in the application
+        parsed_string = re.search(self.regex, input_string)
+        if parsed_string:
+            try:
+                current_progress = float(parsed_string.group())
+            except ValueError:
+                return
+            self.current_progress = current_progress
+
+    def reset_progress(self):
+        self.current_progress = 0.0
