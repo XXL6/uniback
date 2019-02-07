@@ -141,7 +141,7 @@ def lock_credentials():
     except Exception as e:
         logging.error(f'Failed to lock credentials.')
         raise e
-    set_credentials_locked(False)
+    set_credentials_locked(True)
 
 
 def unlock_credentials(key):
@@ -156,6 +156,7 @@ def unlock_credentials(key):
         logging.error(f"Wrong password provided for credential unlocking")
         raise
     set_crypt_key(key)
+    set_credentials_locked(False)
 
 
 def get_crypt_key():

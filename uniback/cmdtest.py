@@ -2,6 +2,7 @@ import subprocess
 import time
 import functools
 import os
+from uniback.tools.progress_tools import Progress
 #from pywin32 import O_NONBLOCK, F_GETFL, F_SETFL
 #import pywin32
 def execute():
@@ -10,11 +11,15 @@ def execute():
             ['robocopy', 'C:\\Users\\topst\\Downloads\\test', 'D:\\Temp'],
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT)
+    progress = Progress()
+    progress.set_regex(('(?<=\r ).*(?=%)'))
     while server.poll() is None:
         #print(os.read(server.stdout.fileno(), 128))
         #time.sleep(0.1)
         #i += 1
-        print(server.stdout.read())
+        print(progress.parse_progress(os.read(server.stdout.fileno(), 64).decode('utf-8')))
+        print(progress.get_current_progress())
+        #print(server.stdout.read())
     print(time.clock() - start)
     #flags = pywin32(server.stdout, pywin32.F_GETFL)
     #pywin32(server.stdout, pywin32.F_SETFL, flags | pywin32.O_NONBLOCK)

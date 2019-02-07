@@ -2,15 +2,14 @@ import re
 
 
 class Progress:
-    
+
+    current_progress = 0.0
 
     def get_current_progress(self):
         return self.current_progress
 
-
     def set_regex(self, regex):
         self.regex = regex
-
 
     def parse_progress(self, input_string):
         # we use regex to try and parse out the potential progress strings
