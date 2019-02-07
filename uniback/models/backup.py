@@ -33,11 +33,12 @@ class Repository(db.Model):
     __tablename__ = 'repository'
     id = db.Column(db.Integer, primary_key=True, nullable=False)
     name = db.Column(db.String(50), nullable=False, unique=True)
-    engine = db.Column(db.Integer, db.ForeignKey('engine.id'), nullable=False)
     time_added = db.Column(
         db.DateTime,
         nullable=False,
         default=datetime.utcnow)
+
+    engine = db.Column(db.Integer, db.ForeignKey('engine.id'), nullable=False)
 
 
 class Engine(db.Model):
@@ -50,16 +51,34 @@ class Engine(db.Model):
         nullable=False,
         default=datetime.utcnow)
 
+    repositories = db.relationship(
+        'Repository',
+        backref='engine'
+    )
+
 
 class PhysicalLocation(db.Model):
     __bind_key__ = 'backup'
     __tablename__ = 'physical_location'
     id = db.Column(db.Integer, primary_key=True, nullable=False)
     name = db.Column(db.String(50), nullable=False, unique=True)
+    time_added = db.Column(
+        db.DateTime,
+        nullable=False,
+        default=datetime.utcnow)
+
     repositories = db.relationship(
-        'Repository',
-        backref='PhysicalLocation',
-        lazy=True)
+            'Repository',
+            backref='physical_location',
+            lazy=True)
+
+
+class BackupSet(db.Model):
+    __bind_key__ = 'backup'
+    __tablename__ = 'backup_set'
+    id = db.Column(db.Integer, primary_key=True, nullable=False)
+    name = db.Column(db.String(50), nullable=False, unique=True)
+    data = db.Column(db.Text, nullable=False)
     time_added = db.Column(
         db.DateTime,
         nullable=False,
