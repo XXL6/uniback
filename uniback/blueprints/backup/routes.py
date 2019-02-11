@@ -13,3 +13,8 @@ def saved_jobs():
 @backup.route(f'/{backup.name}/job_history')
 def job_history():
     return render_template('backup/job_history.html')
+
+
+@backup.route(f'/{backup.name}/backup_sets')
+def backup_sets():
+    return render_template('backup/backup_sets.html')

@@ -36,6 +36,11 @@ def plugins():
     return render_template('settings/plugins.html')
 
 
+@settings.route(f'/{settings.name}/processes')
+def processes():
+    return render_template('settings/processes.html')
+
+
 @settings.route(f'/{settings.name}/credentials', methods=['GET', 'POST'])
 def credentials():
     locked = credentials_locked()
