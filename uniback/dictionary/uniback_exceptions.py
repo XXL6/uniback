@@ -12,3 +12,7 @@ class DbGeneralException(Exception):
 
 class CredentialsLockedException(Exception):
     pass
+
+
+class BSNotSupportedException(Exception):
+    pass
