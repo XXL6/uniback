@@ -5,9 +5,18 @@
     (url_for('backup.job_history'), 'job_history', 'Job History'),
     (url_for('backup.backup_sets'), 'backup_sets', 'Backup Sets')
 ] -%}
-{% from "menu_generator.html" import generate_menu %}
+{% from "menu_generator.html" import generate_menu, generate_sidebar %}
+{% from "list_generator.html" import generate_list %}
 {% block tab_content %}
     {{ generate_menu(menu_list, active_menu, 'Backup') }}
-    {% block menu_content %}
-    {% endblock menu_content %}
+    <!--<div class="wrapper">-->
+        <div class="col-md-8 float-left">
+            {% block menu_content %}
+            {% endblock menu_content %}
+        </div>
+        {{ generate_sidebar() }}
+        <div class="col-md-8 float-left">
+            {{ render_flashed_messages() }}
+        </div>
+    <!--</div>-->
 {% endblock tab_content %}

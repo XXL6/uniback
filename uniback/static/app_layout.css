@@ -45,6 +45,15 @@
     background-color: #5c6bc0;
 }
 
+.list-group-item {
+    background-color: #565657;
+    border-radius: 5px; /* bit of rounding so it looks similar to the rounding of the list-group */
+    line-height: 0.5em;
+}
+
+.list-content {
+    display: inline-block;
+}
 /*
 .wrapper {
     display: flex;
