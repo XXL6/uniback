@@ -33,3 +33,29 @@
         {% endfor %}
     </ul>
 {% endmacro %}
+
+{% macro generate_saved_jobs_list(jobs) %}
+    <ul class="list-group">
+        {% for job in jobs %}
+            <li class="list-group-item mt-1" id="{{group['job_id']}}">
+                <div>
+                    Name: {{job['name']}}
+                    Notes: {{job['notes']}}
+                </div>
+            </li>
+        {% endfor %}
+    </ul>
+{% endmacro %}
+
+{% macro generate_job_queue_list(jobs) %}
+    <ul class="list-group">
+        {% for job in jobs %}
+            <li class="list-group-item mt-1" id="{{group['job_id']}}">
+                <div>
+                    Name: {{job['name']}}
+                    Notes: {{job['notes']}}
+                </div>
+            </li>
+        {% endfor %}
+    </ul>
+{% endmacro %}
