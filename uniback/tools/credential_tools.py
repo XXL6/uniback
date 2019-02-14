@@ -30,6 +30,31 @@ def get_credential(group_id, credential_role):
     return credential.credential_data
 
 
+def get_all_credentials():
+    if credentials_encrypted() and credentials_locked():
+        logging.error("Could not retrieve credentials while \
+            the credential database is locked.")
+        raise CredentialsLockedException
+    group_list = []
+    with app.app_context():
+        credential_groups = CredentialGroup.query.order_by(
+            CredentialGroup.id.asc())
+        for group in credential_groups:
+            temp_group = dict(
+                description=group.description,
+                service_name=group.service_name,
+                group_id=group.id,
+                credentials=group.credentials
+            )
+            if credentials_encrypted():
+                for credential in temp_group['credentials']:
+                    credential.credential_data = decrypt_string(
+                        credential.credential_data,
+                        get_crypt_key())
+            group_list.append(temp_group)
+    return group_list
+
+
 def credentials_encrypted():
     with app.app_context():
         encrypted = SysVars.query.filter_by(
@@ -200,10 +225,11 @@ def store_crypt_key(key):
             logging.error(f"Wrong item in id=0 location of the \
                 credential group table.")
             raise
-        else:
+        elif not credential_group:
             new_credential_group = CredentialGroup(
                 id=0,
-                description=Credential.CREDENTIAL_KEY_GROUP_NAME)
+                description=Credential.CREDENTIAL_KEY_GROUP_NAME,
+                service_name=Credential.CREDENTIAL_KEY_GROUP_NAME)
             try:
                 db.session.add(new_credential_group)
             except exc.InvalidRequestError as e:
@@ -216,7 +242,6 @@ def store_crypt_key(key):
         if not credential:
             new_credential = CredentialStore(
                 group_id=0,
-                service_name=Credential.CREDENTIAL_KEY_GROUP_NAME,
                 credential_role=Credential.CREDENTIAL_KEY_ROLE_NAME,
                 credential_data=bcrypt.generate_password_hash(key))
             try:

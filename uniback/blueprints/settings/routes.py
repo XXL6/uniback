@@ -1,9 +1,11 @@
 from flask import Blueprint, render_template, flash, redirect, url_for, request
 from flask_login import login_required, current_user
-from .forms import UpdateAccountForm, UnlockCredentialStore, LockCredentialStore
+from .forms import UpdateAccountForm, UnlockCredentialStore, \
+    LockCredentialStore
 from uniback import bcrypt, db
-from uniback.models.system import SysVars
-from uniback.tools.credential_tools import credentials_locked
+from uniback.models.system import SysVars, CredentialStore, CredentialGroup
+from uniback.tools.credential_tools import credentials_locked, \
+    get_all_credentials
 
 settings = Blueprint('settings', '__name__')
 
@@ -48,5 +50,10 @@ def credentials():
         form = UnlockCredentialStore
     else:
         form = LockCredentialStore
+    credential_list = get_all_credentials()
 
-    return render_template('settings/credentials.html', credential_database_locked=locked, form=form)
+    return render_template(
+        'settings/credentials.html',
+        credential_database_locked=locked,
+        form=form,
+        credential_list=credential_list)

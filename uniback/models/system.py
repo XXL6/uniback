@@ -26,7 +26,7 @@ class CredentialGroup(db.Model):
     __tablename__ = 'credential_group'
     id = db.Column(db.Integer, primary_key=True)
     credentials = db.relationship(
-        'CredentialStore', backref='credential_group', lazy=True)
+        'CredentialStore', backref='credential_group', lazy='subquery')
     description = db.Column(db.String(100))
     service_name = db.Column(db.String(50), nullable=False)
     time_added = db.Column(

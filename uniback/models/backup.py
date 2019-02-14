@@ -7,6 +7,8 @@ class SavedJobs(db.Model):
     __tablename__ = 'saved_jobs'
     id = db.Column(db.Integer, primary_key=True, nullable=False)
     name = db.Column(db.String, nullable=False, unique=True)
+    notes = db.Column(db.Text)
+    params = db.Column(db.String)
     time_added = db.Column(
         db.DateTime,
         nullable=False,
@@ -21,6 +23,7 @@ class JobQueue(db.Model):
     id = db.Column(db.Integer, primary_key=True, nullable=False)
     name = db.Column(db.String, nullable=False, unique=True)
     status = db.Column(db.Integer, nullable=False)
+    params = db.Column(db.String)
     time_started = db.Column(db.DateTime)
     time_finished = db.Column(db.DateTime)
     time_added = db.Column(

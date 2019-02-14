@@ -1,0 +1,35 @@
+{% macro generate_list(items) %}
+    <ul class="list-group">
+        {% for subitems in items %}
+            <li class="list-group-item mt-1">
+                {% for item in subitems %}
+                    {% if item["display-type"] == "break" %}
+                        <p></p>
+                    {% elif item["display-type"] == "info" %}
+                        <div class="col-md-{{item['width']}} {{item['element-class']}} list-content">
+                            {{item['display-data']}}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </li>
+        {% endfor %}
+    </ul>
+{% endmacro %}
+
+{% macro generate_credential_list(groups) %}
+    <ul class="list-group">
+        {% for group in groups %}
+            <li class="list-group-item mt-1" id="{{group['group_id']}}">
+                <div>
+                    Service name: {{group['service_name']}}
+                    Description: {{group['description']}}
+                </div>
+                {% for credential in group['credentials'] %}
+                    <div class="col-md-7 list-content">
+                        {{credential.credential_role}}: {{credential.credential_data}}
+                    </div>
+                {% endfor %}
+            </li>
+        {% endfor %}
+    </ul>
+{% endmacro %}

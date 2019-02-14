@@ -5,6 +5,12 @@ class JobStatus:
     JOB_STATUS_FINISHED = 40
 
 
+class JobStatusFinished:
+    JOB_STATUS_SUCCESS = 10
+    JOB_STATUS_WARNING = 20
+    JOB_STATUS_ERROR = 30
+
+
 class BackupSetTypes:
     BS_TYPE_FILESFOLDERS = 0
     BS_TYPE_FILESFOLDERS_DESC = "Files and Folders"
