@@ -6,7 +6,7 @@
     (url_for('restore.repositories'), 'restore', 'Restore'),
     (url_for('jobs.job_queue'), 'jobs', 'Jobs'),
     (url_for('repositories.repository_list'), 'repositories', 'Repositories'),
-    (url_for('settings.account'), 'settings', 'Settings')
+    (url_for('settings.system'), 'settings', 'Settings')
 ] -%}
 
 {% macro render_navigation_pills(pill_list, active_tab, sep=False) %}

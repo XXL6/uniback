@@ -54,6 +54,11 @@
 .inline-list-content {
     display: inline-block;
 }
+
+.list-checkbox-div {
+    display: inline-block;
+
+}
 /*
 .wrapper {
     display: flex;

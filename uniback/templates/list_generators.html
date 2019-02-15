@@ -20,6 +20,10 @@
     <ul class="list-group">
         {% for group in groups %}
             <li class="list-group-item mt-1" id="{{group['group_id']}}">
+                <div class="list-checkbox-div">
+                    <input type="checkbox" class="list-checkbox" value="{{group['group_id']}}">
+                </div>
+                
                 <div>
                     Service name: {{group['service_name']}}
                     Description: {{group['description']}}
@@ -32,6 +36,16 @@
             </li>
         {% endfor %}
     </ul>
+    <script>
+        $( ".list-group-item").click(function() {
+            deselectAllItems();
+
+        });
+
+        function deselectAllItems() {
+            $( "input:checkbox" ).prop( "checked", false );
+        };
+    </script>
 {% endmacro %}
 
 {% macro generate_saved_jobs_list(jobs) %}

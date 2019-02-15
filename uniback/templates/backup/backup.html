@@ -6,7 +6,6 @@
     (url_for('backup.backup_sets'), 'backup_sets', 'Backup Sets')
 ] -%}
 {% from "menu_generator.html" import generate_menu, generate_sidebar %}
-{% from "list_generator.html" import generate_list %}
 {% block tab_content %}
     {{ generate_menu(menu_list, active_menu, 'Backup') }}
     <!--<div class="wrapper">-->
