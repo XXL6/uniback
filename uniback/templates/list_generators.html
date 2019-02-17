@@ -21,31 +21,87 @@
         {% for group in groups %}
             <li class="list-group-item mt-1" id="{{group['group_id']}}">
                 <div class="list-checkbox-div">
-                    <input type="checkbox" class="list-checkbox" value="{{group['group_id']}}">
+                    <input type="checkbox" class="list-checkbox" value="{{group['group_id']}}" id="{{group['group_id']}}-box">
                 </div>
-                
-                <div>
-                    Service name: {{group['service_name']}}
-                    Description: {{group['description']}}
-                </div>
-                {% for credential in group['credentials'] %}
-                    <div class="col-md-7 list-content">
-                        {{credential.credential_role}}: {{credential.credential_data}}
+                <div class="list-content-group">
+                    <div class="list-content">
+                        Service name: {{group['service_name']}}<br>
+                        Description: {{group['description']}}
                     </div>
-                {% endfor %}
+                    {# will probably not display credentials in the list
+                    {% for credential in group['credentials'] %}
+                        <div class="list-content col-md-10">
+                            {{credential.credential_role}}: {{credential.credential_data}}
+                        </div>
+                    {% endfor %}#}
+                </div>
             </li>
         {% endfor %}
     </ul>
-    <script>
-        $( ".list-group-item").click(function() {
-            deselectAllItems();
+    {{ item_select_script('/settings/credentials/_get_item_info') }}
+{% endmacro %}
 
-        });
+{% macro item_select_script(info_script_location) %}
+<script>
+    var listGroupItemBGColor =  $( ".list-group-item" ).css( "background-color" );
+    $( ".list-content-group").click(function() {
+        deselectAllItems();
+        var groupId = $(this).parent().attr("id");
+        $( "#" + groupId + "-box" ).prop( "checked", true );
+        $( "#" + groupId + "-box" ).change();
+    });
 
-        function deselectAllItems() {
-            $( "input:checkbox" ).prop( "checked", false );
-        };
-    </script>
+    $( ".list-checkbox" ).change(function() {
+        if ($(this).prop( "checked" ) == true) {
+            startLoader();
+            getItemInfo($(this).val());
+        }
+        else  {
+
+        }
+    });
+
+    $( ".list-content-group" ).hover(function() {
+        //var previousColor = $( ".list-content-group" ).parent().css( "background-color" );
+        $( this ).parent().css( "background-color", "#7676a1" )
+    }, function() {
+        $( this ).parent().css( "background-color", listGroupItemBGColor )
+    });
+
+    $( ".list-content-group" ).mousedown(function() {
+        $( this ).parent().css( "transform", "scale(0.99)" );
+    });
+
+    $( ".list-content-group" ).mouseup(function() {
+        $( this ).parent().css( "transform", "scale(1)" );
+    });
+    function deselectAllItems() {
+        $( "input:checkbox" ).prop( "checked", false );
+        //$( ".list-checkbox" ).change();
+    };
+
+    function getItemInfo(item_id) {
+        $.get($SCRIPT_ROOT + "{{info_script_location|safe}}", {
+                    id: item_id
+                }, function(data) {
+                    populateSidebar(data);
+                }
+            );
+    }
+
+    function populateSidebar(data) {
+        $( ".sidebar-content").empty();
+        /*for (const [ key, value ] of Object.entries(info_dict)) {
+            $( ".sidebar-content" ).append( "<p>" + key + ": " + value + "</p>");
+        }*/
+        $( ".sidebar-content" ).append( data );
+    }
+
+    function startLoader() {
+        $( ".sidebar-content").empty();
+        $( ".sidebar-content" ).append( "<div class='lds-dual-ring'></div>")
+    }
+</script>
 {% endmacro %}
 
 {% macro generate_saved_jobs_list(jobs) %}

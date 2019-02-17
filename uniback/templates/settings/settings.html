@@ -11,13 +11,11 @@
 {% block tab_content %}
     {{ generate_menu(menu_list, active_menu, 'Settings') }}
     <!--<div class="wrapper">-->
-        <div class="col-md-8 float-left">
+        <div class="col-md-8 float-left menu-content">
             {% block menu_content %}
             {% endblock menu_content %}
-        </div>
-        {{ generate_sidebar() }}
-        <div class="col-md-8 float-left">
             {{ render_flashed_messages() }}
         </div>
+        {{ generate_sidebar() }}
     <!--</div>-->
 {% endblock tab_content %}

@@ -9,7 +9,15 @@
 {% endmacro %}
 
 {% macro generate_sidebar() %}
-<nav id="sidebar" class="container-fluid menu-container col-md-2 float-right span2">
-    <h1>TEST</h1>
+<link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='preloader/style.css') }}">
+
+<nav id="sidebar" class="container-fluid col-md-2 float-right span2 sidebar-container">
+    <div class="sidebar-resize-bar"></div>
+    <div class="container sidebar-content">
+
+    </div>
 </nav>
+<script type="text/javascript">
+    
+</script>
 {% endmacro %}

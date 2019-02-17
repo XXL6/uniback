@@ -13,7 +13,7 @@ logging.getLogger('mainLogger')
 
 def get_credential(group_id, credential_role):
     if credentials_encrypted() and credentials_locked():
-        logging.error(f'Could not get credential data for role={credential_role} \
+        logging.error(f'Could not get credential data for role={credential_role} as \
                         credential store is encrypted and locked')
         raise CredentialsLockedException
     with app.app_context():
@@ -30,7 +30,28 @@ def get_credential(group_id, credential_role):
     return credential.credential_data
 
 
-def get_all_credentials():
+# returns a list of credential objects belonging to a certain group
+def get_group_credentials(group_id):
+    if credentials_encrypted() and credentials_locked():
+        logging.error(f'Could not get credentials for group={group_id} as \
+                        credential store is encrypted and locked')
+        raise CredentialsLockedException
+    with app.app_context():
+        credentials = CredentialStore.query.filter_by(
+            group_id=group_id)
+    if credentials_encrypted():
+        decryption_key = get_crypt_key()
+        if decryption_key is None:
+            logging.error(f'Credential database marked as \
+                            unlocked but no key provided')
+            raise Exception("No password specified for credential store")
+        for credential in credentials:
+            credential.credential_data = decrypt_string(
+                credential.credential_data, decryption_key)
+    return credentials
+  
+
+def get_all_credential_groups():
     if credentials_encrypted() and credentials_locked():
         logging.error("Could not retrieve credentials while \
             the credential database is locked.")
@@ -44,13 +65,7 @@ def get_all_credentials():
                 description=group.description,
                 service_name=group.service_name,
                 group_id=group.id,
-                credentials=group.credentials
             )
-            if credentials_encrypted():
-                for credential in temp_group['credentials']:
-                    credential.credential_data = decrypt_string(
-                        credential.credential_data,
-                        get_crypt_key())
             group_list.append(temp_group)
     return group_list
 

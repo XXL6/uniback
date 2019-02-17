@@ -45,19 +45,104 @@
     background-color: #5c6bc0;
 }
 
+
 .list-group-item {
     background-color: #565657;
     border-radius: 5px; /* bit of rounding so it looks similar to the rounding of the list-group */
-    line-height: 1em;
+    line-height: 1.2em;
+    padding-top: 0%;
+    padding-bottom: 0%;
 }
 
+/*
+.list-group-item:hover {
+    background-color: #7676a1;
+    border-radius: 5px; /* bit of rounding so it looks similar to the rounding of the list-group 
+    line-height: 1.2em;
+}
+
+.list-group-item:active {
+    background-color: #7676a1;
+    transform: scale(0.99);
+    border-radius: 5px; /* bit of rounding so it looks similar to the rounding of the list-group 
+    line-height: 1.2em;
+}
+*/
 .inline-list-content {
-    display: inline-block;
+    position: relative;    
 }
 
 .list-checkbox-div {
-    display: inline-block;
+    top: 0px;
+    float: left;
+    position: absolute;
+    width: 4%;
+    height: 100%;
+    border-right-style: solid;
+    border-color: #29254d;
+}
 
+.list-content-group {
+    top: 0px;
+    left: 5%;
+    position: relative;
+    width: 95%;
+    height: 100%;
+    padding-bottom: 10px;
+    padding-top: 10px;
+}
+
+.list-checkbox {
+    float: left;
+    position: absolute;
+    top: 40%;
+    transform: scale(1.5);
+    /*height: 100%;
+    width: 50%;
+    position: absolute;
+    top: 40%;*/
+}
+
+.list-content {
+    position: relative;
+}
+
+.sidebar-container {
+    border-top-style: solid;
+    border-color: #29254d;
+    background-color: #273746;
+    overflow: auto;
+    height: calc(100vh - 56px);
+    padding-left: 0%;
+    padding-right: 0%;
+}
+
+.sidebar-resize-bar {
+    position: sticky;
+    left: 0;
+    float: left;
+    z-index: 100;
+    height: calc(100vh - 59px); /* add extra -3 because we're accounting for the top border of .sidebar-container */
+    width: 3px;
+    cursor: ew-resize;
+    background-color: #29254d; /* same color as the .sidebar-container border-color as this is now its' "border" instead of using border-left
+    we do this so we have a border that we can have the cursor change to the resize cursor*/
+}
+
+.sidebar-content {
+    padding-right: 15px;
+    padding-left: 15px;
+    width: calc(100% - 6px);
+    height: 100%;
+    position: relative;
+    left: 3px;
+}
+
+.menu-content {
+    overflow: auto;
+    height: calc(100vh - 56px);
+    padding-left: 0%;
+    padding-right: 0%;
 }
 /*
 .wrapper {

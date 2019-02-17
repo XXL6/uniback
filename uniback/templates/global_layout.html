@@ -13,6 +13,9 @@
 </head>
 <script src="{{ url_for('static', filename='jquery.js') }}"></script>
 <script src="{{ url_for('static', filename='bootstrap.js') }}"></script>
+<script type="text/javascript">
+    $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+</script>
 
 {% block app_content %}
 {% endblock app_content %}
