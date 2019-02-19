@@ -1,8 +1,9 @@
 {% macro generate_menu(menu_item_list, active_menu, menu_header="Menu", sep=False) %}
-<div class="container-fluid menu-container col-md-2 float-left span2">
-    <ul class="nav flex-column nav-pills mt-3" id="v-pills-tab" aria-orientation="vertical">
+<link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='menu.css') }}"> 
+<div class="menu-container">
+    <ul class="menu-items" aria-orientation="vertical">
         {% for href, id, caption in menu_item_list %}
-            <a class="nav-link menu-item {% if active_menu == id %}active{% endif %}" role="tab" href="{{ href }}">{{ caption }}</a>
+            <a class="menu-item {% if active_menu == id %}active{% endif %}" role="tab" href="{{ href }}">{{ caption }}</a>
         {% endfor %}
     </ul>
 </div>
@@ -10,14 +11,39 @@
 
 {% macro generate_sidebar() %}
 <link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='preloader/style.css') }}">
-
-<nav id="sidebar" class="container-fluid col-md-2 float-right span2 sidebar-container">
-    <div class="sidebar-resize-bar"></div>
+<link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='sidebar.css') }}">
+<div class="sidebar-resize-bar"></div>
+<nav id="sidebar" class="flex-col sidebar-container">
     <div class="container sidebar-content">
 
     </div>
 </nav>
 <script type="text/javascript">
-    
+    var handlerDragging = false;
+    var handler = $( ".sidebar-resize-bar" ).get(0);
+    var wrapper = $( ".flex-wrapper" ).get(0);
+
+    $( document ).mousedown(function(e) {
+        if (e.target === handler) {
+            handlerDragging = true;
+            $( "body" ).css( "cursor", "ew-resize");
+        }
+    });
+
+    $( document ).mousemove(function(e) {
+        if (!handlerDragging) {
+            return false;
+        }
+        var containerOffsetLeft = wrapper.offsetLeft;
+        var pointerRelativeXpos = e.pageX - containerOffsetLeft;
+
+        $( ".menu-content" ).css("width", (pointerRelativeXpos) + "px");
+        $( ".menu-content" ).css("flexGrow", "0");
+    });
+
+    $( document ).mouseup(function(e) {
+        handlerDragging = false;
+        $( "body" ).css( "cursor", "default");
+    });
 </script>
 {% endmacro %}

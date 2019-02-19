@@ -1,50 +1,18 @@
 .app-header {
-    color: #eeeeee;
-    background-color: #273746;
-    display: inline-block;
-    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(20, 1fr);
+    height: 60px;
 }
 
-.corner-title {
-    background-color: #1C2833;
-    display: inline-block;
-    min-width: 140px;
+.tab-content {
+    display: grid;
+    grid-template-columns: repeat(20, 1fr);
+    height: calc(100vh - 60px);
 }
 
-.navbar .nav-pills > li > a {
-    color: #eeeeee;
+.list-group {
+    padding-left: 0px;
 }
-
-.navbar .nav-pills > li > a:hover {
-    background-color: #ffe0b2;
-    color: #111111;
-}
-
-.navbar .nav-pills .active > a {
-    background-color: #ff9800;
-    color: #ffffff;
-}
-
-.menu-container {
-    background-color: #273746;
-    height: calc(100vh - 56px);
-    /*height: 100vh;*/
-}
-
-#v-pills-tab {
-    color: #eeeeee;
-}
-
-.menu-container .menu-item > a{
-    /*background-color: #c5cae9;*/
-    background-color: #ffffff;
-    color: #eeeeee;
-}
-
-.menu-container .menu-item .active > a {
-    background-color: #5c6bc0;
-}
-
 
 .list-group-item {
     background-color: #565657;
@@ -52,6 +20,23 @@
     line-height: 1.2em;
     padding-top: 0%;
     padding-bottom: 0%;
+    margin-bottom: 3px;
+    display: grid;
+    grid-template-columns: repeat(16, 1fr);
+}
+
+.list-group-item.active {
+    background-color: #2efddbc2;
+}
+
+.list-group-item.hover {
+    background-color: #7676a1;
+    cursor: pointer;
+}
+
+.list-group-item.active.hover {
+    background-color: #404064;
+    cursor: pointer;
 }
 
 /*
@@ -75,90 +60,50 @@
 .list-checkbox-div {
     top: 0px;
     float: left;
-    position: absolute;
-    width: 4%;
+    position: relative;
     height: 100%;
     border-right-style: solid;
     border-color: #29254d;
+    grid-column: span 1;
+    min-width: 35px;
 }
 
 .list-content-group {
     top: 0px;
-    left: 5%;
     position: relative;
-    width: 95%;
-    height: 100%;
+    padding-left: 5px;
     padding-bottom: 10px;
     padding-top: 10px;
+    grid-column: span 15;
 }
 
 .list-checkbox {
-    float: left;
-    position: absolute;
+    left: 40%;
+    position: relative;
     top: 40%;
     transform: scale(1.5);
-    /*height: 100%;
-    width: 50%;
-    position: absolute;
-    top: 40%;*/
 }
 
 .list-content {
     position: relative;
 }
 
-.sidebar-container {
-    border-top-style: solid;
-    border-color: #29254d;
-    background-color: #273746;
-    overflow: auto;
-    height: calc(100vh - 56px);
-    padding-left: 0%;
-    padding-right: 0%;
-}
 
-.sidebar-resize-bar {
-    position: sticky;
-    left: 0;
-    float: left;
-    z-index: 100;
-    height: calc(100vh - 59px); /* add extra -3 because we're accounting for the top border of .sidebar-container */
-    width: 3px;
-    cursor: ew-resize;
-    background-color: #29254d; /* same color as the .sidebar-container border-color as this is now its' "border" instead of using border-left
-    we do this so we have a border that we can have the cursor change to the resize cursor*/
-}
-
-.sidebar-content {
-    padding-right: 15px;
-    padding-left: 15px;
-    width: calc(100% - 6px);
-    height: 100%;
-    position: relative;
-    left: 3px;
-}
-
+/* not actually part of the left-hand menu but is all the content to the right of the menu and to the left of the sidebar*/
 .menu-content {
     overflow: auto;
-    height: calc(100vh - 56px);
+    height: 100%;
     padding-left: 0%;
     padding-right: 0%;
+    box-sizing: border-box;
+    width: 70%;
+    min-width: 300px;
+    flex: 1 1 auto;
 }
-/*
-.wrapper {
+
+.flex-wrapper {
+    overflow: auto;
     display: flex;
     width: 100%;
-    align-items: stretch;
+    grid-column: span 17;
 }
-
-#sidebar {
-    min-width: 250px;
-    max-width: 250px;
-    min-height: calc(100vh - 56px);
-}
-
-#sidebar.active {
-    margin-right: -250px;
-    overflow: hidden;
-}
-*/

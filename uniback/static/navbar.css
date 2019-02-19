@@ -1,0 +1,67 @@
+.nav-account-items {
+    display: relative;
+    float: right;
+    grid-column: span 3;
+    padding: 10px 10px 10px 10px;
+    background-color: #273746;
+}
+
+.navigation-bar {
+    color: #eeeeee;
+    background-color: #273746;
+    display: inline-block;
+    width: 100%;
+}
+
+.corner-title {
+    background-color: #1C2833;
+    display: inline-block;
+    min-width: 140px;
+    grid-column: span 3;
+}
+
+.corner-title > h1 {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.pill-bar {
+    grid-column: span 14;
+    background-color: #273746;
+}
+
+.nav-pills {
+    margin-top: 5px;
+    margin-bottom: 5px;
+
+}
+
+.pill-bar .nav-pills > li > a {
+    color: #eeeeee;
+    display: inline-block;
+    text-align: center;
+    padding: 14px;
+    text-decoration: none;
+    font-size: 17px;
+    border-radius: 5px;
+}
+
+.pill-bar .nav-pills > li > a:hover {
+    background-color: #ffe0b2;
+    color: #111111;
+}
+
+.pill-bar .nav-pills > li > a:active {
+    background-color: #997a4b;
+    color: #111111;
+    transform: scale(0.99);
+}
+
+.nav-item {
+    display: inline-block;
+}
+
+.pill-bar .nav-pills .active > a {
+    background-color: #ff9800;
+    color: #ffffff;
+}

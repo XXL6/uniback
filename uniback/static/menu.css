@@ -1,0 +1,46 @@
+.menu-container {
+    background-color: #273746;
+    height: calc(100vh - 60px);
+    grid-column: span 3;
+    /*height: 100vh;*/
+}
+
+#v-pills-tab {
+    color: #eeeeee;
+}
+
+.menu-container .menu-item {
+    color: #eeeeee;
+    display: inline-block;
+    text-align: center;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    width: 100%;
+    text-decoration: none;
+    font-size: 17px;
+    border-radius: 5px;
+}
+
+.menu-container .menu-item:hover {
+    background-color: #a3a5f1;
+    color: #111111;
+}
+
+.menu-container .menu-item.active:hover {
+    background-color: #a3a5f1;
+    color: #111111;
+}
+
+.menu-container .menu-item.active {
+    background-color: #273ec2;
+}
+
+.menu-container .menu-item:active {
+    background-color: #44308d;
+    color: #ffffff;
+    transform: scale(0.99);
+}
+
+ul.menu-items {
+    padding-left: 0%;
+}

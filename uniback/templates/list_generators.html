@@ -19,9 +19,10 @@
 {% macro generate_credential_list(groups) %}
     <ul class="list-group">
         {% for group in groups %}
-            <li class="list-group-item mt-1" id="{{group['group_id']}}">
+            <li class="list-group-item" id="{{group['group_id']}}">
                 <div class="list-checkbox-div">
-                    <input type="checkbox" class="list-checkbox" value="{{group['group_id']}}" id="{{group['group_id']}}-box">
+                    {# autocomplete=off so that checkbox doesn't stay checked after refresh #}
+                    <input type="checkbox" class="list-checkbox" autocomplete="off" value="{{group['group_id']}}" id="{{group['group_id']}}-box">
                 </div>
                 <div class="list-content-group">
                     <div class="list-content">
@@ -29,11 +30,12 @@
                         Description: {{group['description']}}
                     </div>
                     {# will probably not display credentials in the list
-                    {% for credential in group['credentials'] %}
-                        <div class="list-content col-md-10">
-                            {{credential.credential_role}}: {{credential.credential_data}}
-                        </div>
-                    {% endfor %}#}
+                        {% for credential in group['credentials'] %}
+                            <div class="list-content col-md-10">
+                                {{credential.credential_role}}: {{credential.credential_data}}
+                            </div>
+                        {% endfor %}
+                    #}
                 </div>
             </li>
         {% endfor %}
@@ -43,7 +45,7 @@
 
 {% macro item_select_script(info_script_location) %}
 <script>
-    var listGroupItemBGColor =  $( ".list-group-item" ).css( "background-color" );
+
     $( ".list-content-group").click(function() {
         deselectAllItems();
         var groupId = $(this).parent().attr("id");
@@ -55,19 +57,29 @@
         if ($(this).prop( "checked" ) == true) {
             startLoader();
             getItemInfo($(this).val());
+            //$( this ).parent().addClass( 'active' );
+            $( ".list-group-item[id='" + $( this ).val() + "']" ).addClass( 'active' );
         }
         else  {
-
+            $( ".list-group-item[id='" + $( this ).val() + "']" ).removeClass( 'active' );
         }
     });
 
+    /*  
+        hovers and mousedowns done in JS as I need the parent to get the property when hovering over one of the child elements
+        doesn't seem to be possible in pure CSS
+    */
     $( ".list-content-group" ).hover(function() {
-        //var previousColor = $( ".list-content-group" ).parent().css( "background-color" );
-        $( this ).parent().css( "background-color", "#7676a1" )
+        $( this ).parent().addClass( 'hover' );
     }, function() {
-        $( this ).parent().css( "background-color", listGroupItemBGColor )
+        $( this ).parent().removeClass( 'hover' );
     });
 
+    /*  
+        following code is in case you want the list item to become a little smaller while being clicked
+        I decided against it for now as I think it looks a bit classier if it just changes color 
+    */
+    /*
     $( ".list-content-group" ).mousedown(function() {
         $( this ).parent().css( "transform", "scale(0.99)" );
     });
@@ -75,8 +87,11 @@
     $( ".list-content-group" ).mouseup(function() {
         $( this ).parent().css( "transform", "scale(1)" );
     });
+    */
+
     function deselectAllItems() {
         $( "input:checkbox" ).prop( "checked", false );
+        $( ".list-group-item" ).removeClass( 'active' );
         //$( ".list-checkbox" ).change();
     };
 
@@ -91,9 +106,6 @@
 
     function populateSidebar(data) {
         $( ".sidebar-content").empty();
-        /*for (const [ key, value ] of Object.entries(info_dict)) {
-            $( ".sidebar-content" ).append( "<p>" + key + ": " + value + "</p>");
-        }*/
         $( ".sidebar-content" ).append( data );
     }
 

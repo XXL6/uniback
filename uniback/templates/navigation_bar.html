@@ -10,7 +10,8 @@
 ] -%}
 
 {% macro render_navigation_pills(pill_list, active_tab, sep=False) %}
-    <ul class="nav nav-pills">
+    <link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='navbar.css') }}">
+    <ul class="nav-pills">
         {% for href, id, name in navigation_pills %}
             <li class="nav-item {% if id == active_tab %} active {% endif %}">
                 <a class="nav-link" href="{{ href }}">{{ name }}</a>
