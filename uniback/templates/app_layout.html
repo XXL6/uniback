@@ -1,9 +1,8 @@
 {# Main layout for the application. Mainly created so that the login page could be separated yet retain
-    all the necessary packages like bootstrap, etc. #}
+    all the necessary packages and css from the global_layout. #}
 {% extends "global_layout.html" %}
 {% block app_content %}
 {% import "navigation_bar.html" as navigation_bar %}
-<link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='app_layout.css') }}">
 <body>
     <div class="app-header">
         <header class="corner-title">

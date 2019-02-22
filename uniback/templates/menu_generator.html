@@ -1,5 +1,4 @@
 {% macro generate_menu(menu_item_list, active_menu, menu_header="Menu", sep=False) %}
-<link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='menu.css') }}"> 
 <div class="menu-container">
     <ul class="menu-items" aria-orientation="vertical">
         {% for href, id, caption in menu_item_list %}
@@ -10,8 +9,6 @@
 {% endmacro %}
 
 {% macro generate_sidebar() %}
-<link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='preloader/style.css') }}">
-<link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='sidebar.css') }}">
 <div class="sidebar-resize-bar"></div>
 <nav id="sidebar" class="flex-col sidebar-container">
     <div class="container sidebar-content">
@@ -45,5 +42,51 @@
         handlerDragging = false;
         $( "body" ).css( "cursor", "default");
     });
+</script>
+{% endmacro %}
+
+{% macro generate_action_menu(action_item_list, action_script_location) %}
+<div class="action-menu">
+    {% for variant, item_list in action_item_list.items() %}
+    <ul class='variant-{{variant}} action-menu-item-list'>
+        {% for item in item_list %}
+                <li class="action-menu-item" action="{{item['action']}}">
+                    <button class="action-menu-item-button" onclick="handleAction('{{item['action']}}')"> {# this might look like an error, but it works #}
+                        <img class="action-menu-item-icon" src="{{item['icon']}}" alt="{{item['action_name']}}">
+                        {{item['action_name']}}
+                    </button>
+                </li>
+        {% endfor %}
+    </ul>
+    {% endfor %}
+</div>
+<script type="text/javascript">
+    function handleAction(action_name) {
+        switch(action_name) {
+            case "delete":
+                var itemsToDelete = getCheckedItemIds();
+                $.ajax({
+                    type: "POST",
+                    url: $SCRIPT_ROOT + "{{action_script_location|safe}}",
+                    contentType: "application/json",
+                    data: JSON.stringify({group_ids: itemsToDelete}),
+                    dataType: "json",
+                    success: function(response) {
+                        location.reload();
+                    },
+                    error: function(error) {
+                        location.reload();
+                    }
+                });
+                break;
+            default:
+                alert("No ayyliens here lmao");
+        }
+    }
+
+    function displayActionMenuVariant(variant) {
+        $( ".action-menu-item-list" ).css("display", "none");
+        $( ".action-menu-item-list.variant-" + variant.toString()).css("display", "inline-block");
+    }
 </script>
 {% endmacro %}

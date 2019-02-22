@@ -1,0 +1,21 @@
+.action-menu {
+    width:100%;
+    border-bottom-style: solid;
+    border-bottom-width: 3px;
+    max-height: 100px;
+    min-height: 50px;
+}
+
+.action-menu-item-list {
+    width: 100%;
+    height: 100%;
+    padding-left: 0px;
+    margin: 0px 0px 0px 0px;
+    display: none;
+    grid-template-columns: repeat(12, 1fr);
+}
+
+.action-menu-item {
+    display:inline;
+    grid-column: span 2;
+}

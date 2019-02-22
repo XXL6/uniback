@@ -1,3 +1,8 @@
+.container {
+    width: 100%;
+    padding: 0px 0px 0px 0px;
+}
+
 .app-header {
     display: grid;
     grid-template-columns: repeat(20, 1fr);
@@ -12,11 +17,12 @@
 
 .list-group {
     padding-left: 0px;
+    border-radius: 0px;
 }
 
 .list-group-item {
-    background-color: #565657;
-    border-radius: 5px; /* bit of rounding so it looks similar to the rounding of the list-group */
+    /*background-color: #898376;*/
+    border-radius: 0px; /* bit of rounding so it looks similar to the rounding of the list-group */
     line-height: 1.2em;
     padding-top: 0%;
     padding-bottom: 0%;
@@ -25,17 +31,13 @@
     grid-template-columns: repeat(16, 1fr);
 }
 
-.list-group-item.active {
-    background-color: #2efddbc2;
-}
+/*.list-group-item.active {
+    background-color: #B8B2A2;
+    color: #333;
+}*/
 
 .list-group-item.hover {
-    background-color: #7676a1;
-    cursor: pointer;
-}
-
-.list-group-item.active.hover {
-    background-color: #404064;
+    /*background-color: #B8B2A2;*/
     cursor: pointer;
 }
 
@@ -58,14 +60,16 @@
 }
 
 .list-checkbox-div {
+    display: none; /* don't display the checkbox unless the item select script is associated with the list*/
     top: 0px;
     float: left;
     position: relative;
     height: 100%;
     border-right-style: solid;
-    border-color: #29254d;
+    /*border-color: #33353C;*/
     grid-column: span 1;
     min-width: 35px;
+    /*background-color: #33353C;*/
 }
 
 .list-content-group {

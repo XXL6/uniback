@@ -3,18 +3,18 @@
     float: right;
     grid-column: span 3;
     padding: 10px 10px 10px 10px;
-    background-color: #273746;
+    background-color: #17181E;
 }
 
 .navigation-bar {
-    color: #eeeeee;
-    background-color: #273746;
+    /*color: #eeeeee;
+    background-color: #17181E;*/
     display: inline-block;
     width: 100%;
 }
 
 .corner-title {
-    background-color: #1C2833;
+    /*background-color: #33353C;*/
     display: inline-block;
     min-width: 140px;
     grid-column: span 3;
@@ -27,7 +27,7 @@
 
 .pill-bar {
     grid-column: span 14;
-    background-color: #273746;
+    /*background-color: #17181E;*/
 }
 
 .nav-pills {
@@ -37,7 +37,7 @@
 }
 
 .pill-bar .nav-pills > li > a {
-    color: #eeeeee;
+    /*color: #eeeeee;*/
     display: inline-block;
     text-align: center;
     padding: 14px;
@@ -46,14 +46,14 @@
     border-radius: 5px;
 }
 
-.pill-bar .nav-pills > li > a:hover {
-    background-color: #ffe0b2;
+/*.pill-bar .nav-pills > li > a:hover {
+    background-color: #71737D;
     color: #111111;
-}
+}*/
 
 .pill-bar .nav-pills > li > a:active {
-    background-color: #997a4b;
-    color: #111111;
+    /*background-color: #71737D;
+    color: #111111;*/
     transform: scale(0.99);
 }
 
@@ -61,7 +61,7 @@
     display: inline-block;
 }
 
-.pill-bar .nav-pills .active > a {
-    background-color: #ff9800;
+/*.pill-bar .nav-pills .active > a {
+    background-color: #71737D;
     color: #ffffff;
-}
+}*/

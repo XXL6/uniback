@@ -6,10 +6,12 @@ from .forms import UpdateAccountForm, UnlockCredentialStore, \
 from uniback import bcrypt, db
 from uniback.models.system import CredentialGroup
 from uniback.tools.credential_tools import credentials_locked, \
-    get_all_credential_groups, get_group_credentials
+    get_all_credential_groups, get_group_credentials, remove_credentials
+import logging
+import json
 
 settings = Blueprint('settings', '__name__')
-
+logger = logging.getLogger('debugLogger')
 
 @settings.route(f'/{settings.name}', methods=['GET', 'POST'])
 @settings.route(f'/{settings.name}/account', methods=['GET', 'POST'])
@@ -54,11 +56,17 @@ def credentials():
         form = LockCredentialStore
     credential_groups = get_all_credential_groups()
 
+    action_menu_list = {
+        '1': [
+            {'action_name': 'Delete', 'action': 'delete', 'icon': ''}
+            ]
+        }
     return render_template(
         'settings/credentials.html',
         credential_database_locked=locked,
         form=form,
-        credential_groups=credential_groups)
+        credential_groups=credential_groups,
+        action_menu_list=action_menu_list)
 
 
 @settings.route(f'/{settings.name}/credentials/_get_item_info')
@@ -79,3 +87,13 @@ def get_item_info():
     # return jsonify(info=info_dict)
     # return json.dumps(info_dict)
     return render_template("sidebar/credentials.html", info_dict=info_dict)
+
+
+@settings.route(f'/{settings.name}/credentials/_delete', methods=['POST'])
+def delete_groups():
+    group_id_list = request.get_json().get('group_ids')
+    for group_id in group_id_list:
+        remove_credentials(group_id)
+        # logger.debug(group_id)
+    flash("Successfully removed items ayylmao", category="success")
+    return json.dumps({'success': True}), 200, {'ContentType': 'application/json'}

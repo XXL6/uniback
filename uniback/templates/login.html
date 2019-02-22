@@ -3,7 +3,7 @@
 <body>
     <form method="POST">
         {{ form.hidden_tag() }}
-        <div class="container">
+        <div class="login-container">
             <fieldset class="form-group col-md-4 offset-md-4">
                 <legend class="border-bottom mb-4 mt-4">Log In</legend>
                 <div class="form-group">
@@ -38,7 +38,7 @@
                 </div>
                 <div class="form-group">
                     {{ form.remember_me.label(class="form-control-label") }}
-                    {{ form.remember_me(class="form-control form-control-lg") }}
+                    {{ form.remember_me(class="form-control") }}
                 </div>
             </fieldset>
         </div>

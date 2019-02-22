@@ -29,7 +29,7 @@
                         Service name: {{group['service_name']}}<br>
                         Description: {{group['description']}}
                     </div>
-                    {# will probably not display credentials in the list
+                    {# decided against displaying credentials directly in the list items for now
                         {% for credential in group['credentials'] %}
                             <div class="list-content col-md-10">
                                 {{credential.credential_role}}: {{credential.credential_data}}
@@ -45,7 +45,7 @@
 
 {% macro item_select_script(info_script_location) %}
 <script>
-
+    $( ".list-checkbox-div" ).css("display", "block");
     $( ".list-content-group").click(function() {
         deselectAllItems();
         var groupId = $(this).parent().attr("id");
@@ -54,14 +54,41 @@
     });
 
     $( ".list-checkbox" ).change(function() {
+        var checkedItems = getCheckedItemIds();
         if ($(this).prop( "checked" ) == true) {
-            startLoader();
-            getItemInfo($(this).val());
-            //$( this ).parent().addClass( 'active' );
+            if (checkedItems.length == 1) {
+                startLoader();
+                getItemInfo($(this).val());
+            } else {
+                emptySidebar();
+            }
+            // if checkbox checked, we highlight the item itself
             $( ".list-group-item[id='" + $( this ).val() + "']" ).addClass( 'active' );
         }
         else  {
+            // if a single item remains selected, we want to populate its info in the sidebar
+            if (checkedItems.length == 1) {
+                startLoader();
+                getItemInfo(checkedItems[0]);
+            } else {
+                // if final item gets unchecked, we clean the sidebar
+                emptySidebar();
+            }
             $( ".list-group-item[id='" + $( this ).val() + "']" ).removeClass( 'active' );
+        }
+
+        if (typeof displayActionMenuVariant === "function") {
+            switch (checkedItems.length) {
+                case 0: 
+                    displayActionMenuVariant(0);
+                    break;
+                case 1:
+                    displayActionMenuVariant(1);
+                    break;
+                default:
+                    displayActionMenuVariant(2);
+                    break;
+            }
         }
     });
 
@@ -104,13 +131,27 @@
             );
     }
 
+    function getCheckedItemIds() {
+        var itemList = $( ".list-checkbox:checked" ).get();
+        var idList = [];
+        for (var i = 0; i < itemList.length; i++) {
+            idList.push(itemList[i].value);
+        }
+        return idList;
+    }
+
+    function emptySidebar() {
+        $( ".sidebar-content" ).empty();
+    }
+
     function populateSidebar(data) {
-        $( ".sidebar-content").empty();
+        $( ".sidebar-content" ).empty();
         $( ".sidebar-content" ).append( data );
     }
 
+    // spinny thing when item is checked while AJAX retrieves the info
     function startLoader() {
-        $( ".sidebar-content").empty();
+        $( ".sidebar-content" ).empty();
         $( ".sidebar-content" ).append( "<div class='lds-dual-ring'></div>")
     }
 </script>

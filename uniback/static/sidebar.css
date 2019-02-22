@@ -1,7 +1,5 @@
 .sidebar-container {
-    border-top-style: solid;
-    border-color: #29254d;
-    background-color: #273746;
+    /*background-color: #17181E;*/
     overflow: auto;
     padding-left: 0%;
     padding-right: 0%;
@@ -18,7 +16,7 @@
     height: 100%;
     width: 3px;
     cursor: ew-resize;
-    background-color: #29254d; /* same color as the .sidebar-container border-color as this is now its' "border" instead of using border-left
+    /*background-color: #17181E; /* same color as the .sidebar-container border-color as this is now its' "border" instead of using border-left
     we do this so we have a border that we can have the cursor change to the resize cursor*/
     flex: 0 0 auto;
 }
@@ -29,5 +27,4 @@
     width: calc(100% - 33px); /* minus padding and the resize-bar */
     height: 100%;
     position: relative;
-    left: 3px;
 }
