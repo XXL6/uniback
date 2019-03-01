@@ -1,43 +1,23 @@
-from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from uniback.config import Config
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager
 import logging
 from uniback import ub_logging
+from uniback.tools.process_manager import ProcessManager
+# from uniback.tools.credential_manager import CredentialManager
 
+# import uniback.tools.credential_manager as cm
+from multiprocessing import current_process
+# from test2.process_manager import ProcessManager
+
+ub_logging.initialize_logging()
 db = SQLAlchemy()
-bcrypt = Bcrypt()
+process_manager = ProcessManager()
+credential_manager = None
 login_manager = LoginManager()
 login_manager.login_view = 'users.login'
 login_manager.login_message_category = 'info'
-ub_logging.initialize_logging()
 logger = logging.getLogger('mainLogger')
-
-
-def create_app(config_class=Config):
-
-    app = Flask(__name__)
-    print(__name__)
-    app.config.from_object(Config)
-    from uniback.blueprints.main.routes import main
-    from uniback.blueprints.jobs.routes import jobs
-    from uniback.blueprints.users.routes import users
-    from uniback.blueprints.backup.routes import backup
-    from uniback.blueprints.restore.routes import restore
-    from uniback.blueprints.settings.routes import settings
-    from uniback.blueprints.repositories.routes import repositories
-    app.register_blueprint(main)
-    app.register_blueprint(jobs)
-    app.register_blueprint(users)
-    app.register_blueprint(backup)
-    app.register_blueprint(restore)
-    app.register_blueprint(settings)
-    app.register_blueprint(repositories)
-    db.init_app(app)
-    login_manager.init_app(app)
-    bcrypt.init_app(app)
-    with app.app_context():
-        db.create_all()
-    logger.info('App created ayy lmao')
-    return app
+bcrypt = Bcrypt()
+print(current_process().name)
+print(__name__)

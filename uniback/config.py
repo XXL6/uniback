@@ -4,6 +4,7 @@
 class Config:
     SQLALCHEMY_BINDS = {
         'system':   'sqlite:///ub_system.db',
+        'memory':   'sqlite://',
         'backup':   'sqlite:///ub_backup.db'
     }
     SECRET_KEY = 'devkey'

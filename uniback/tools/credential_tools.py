@@ -1,6 +1,7 @@
 from os import environ
 from uniback.models.system import CredentialStore, SysVars, CredentialGroup
-from uniback.dictionary.uniback_variables import Credential
+from uniback.dictionary.uniback_variables import Credential as CredentialVars
+from uniback.dictionary.uniback_constants import Credential
 from uniback.dictionary.uniback_exceptions import CredentialsLockedException
 from sqlalchemy import exc
 from uniback import db, bcrypt
@@ -9,6 +10,7 @@ from flask import current_app as app
 import logging
 
 logger = logging.getLogger('mainLogger')
+crypt_key = ""
 
 
 def get_credential(group_id, credential_role):
@@ -50,7 +52,7 @@ def get_group_credentials(group_id):
             credential.credential_data = decrypt_string(
                 credential.credential_data, decryption_key)
     return credentials
-  
+
 
 def get_all_credential_groups():
     if credentials_encrypted() and credentials_locked():
@@ -78,6 +80,7 @@ def credentials_encrypted():
     return encrypted.var_data == '1'
 
 
+# TODO
 def credentials_locked():
     with app.app_context():
         locked = SysVars.query.filter_by(
@@ -93,6 +96,7 @@ def set_credentials_encrypted(set_encrypted):
         db.session.commit()
 
 
+# TODO
 def set_credentials_locked(set_locked):
     with app.app_context():
         locked = SysVars.query.filter_by(
@@ -202,12 +206,14 @@ def unlock_credentials(key):
 
 def get_crypt_key():
     return environ.get(Credential.CREDENTIAL_ENVIRONMENT_VAR_NAME)
+    # return CredentialVars.CRYPT_KEY
 
 
 # method used to store the user's cryptographic key for later use
 # can be changed if environmental variables are not wanted
 def set_crypt_key(key):
     environ[Credential.CREDENTIAL_ENVIRONMENT_VAR_NAME] = key
+    # CredentialVars.CRYPT_KEY = key
 
 
 # stores and encrypts they key in the database using bcrypt

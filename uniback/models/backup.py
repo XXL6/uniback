@@ -60,7 +60,10 @@ class Repository(db.Model):
         nullable=False,
         default=datetime.utcnow)
 
-    engine = db.Column(db.Integer, db.ForeignKey('engine.id'), nullable=False)
+    engine_id = db.Column(
+        db.Integer, db.ForeignKey('engine.id'), nullable=False)
+    physical_location_id = db.Column(
+        db.Integer, db.ForeignKey('physical_location.id'), nullable=False)
 
 
 class Engine(db.Model):

@@ -3,15 +3,18 @@ from flask import Blueprint, render_template, flash, redirect, \
 from flask_login import login_required, current_user
 from .forms import UpdateAccountForm, UnlockCredentialStore, \
     LockCredentialStore
-from uniback import bcrypt, db
+from uniback import bcrypt, db, process_manager
+from uniback.misc import credential_manager
 from uniback.models.system import CredentialGroup
-from uniback.tools.credential_tools import credentials_locked, \
-    get_all_credential_groups, get_group_credentials, remove_credentials
+# from uniback.tools.credential_tools import credentials_locked, \
+#    get_all_credential_groups, get_group_credentials, remove_credentials, \
+#    set_crypt_key
 import logging
 import json
 
 settings = Blueprint('settings', '__name__')
 logger = logging.getLogger('debugLogger')
+
 
 @settings.route(f'/{settings.name}', methods=['GET', 'POST'])
 @settings.route(f'/{settings.name}/account', methods=['GET', 'POST'])
@@ -44,17 +47,26 @@ def plugins():
 
 @settings.route(f'/{settings.name}/processes')
 def processes():
-    return render_template('settings/processes.html')
+    process_list = process_manager.get_process_list()
+    return render_template('settings/processes.html', processes=process_list)
+
+
+@settings.route(f'/{settings.name}/processes/_get_process_info')
+def get_process_info():
+    info_dict = {}
+    process_id = request.args.get('id', 0, type=int)
+    info_dict['description'] = process_manager.get_description(process_id)
+    return render_template('sidebar/processes.html', info_dict=info_dict)
 
 
 @settings.route(f'/{settings.name}/credentials', methods=['GET', 'POST'])
 def credentials():
-    locked = credentials_locked()
+    locked = credential_manager.credentials_locked()
     if locked:
         form = UnlockCredentialStore
     else:
         form = LockCredentialStore
-    credential_groups = get_all_credential_groups()
+    credential_groups = credential_manager.get_all_credential_groups()
 
     action_menu_list = {
         '1': [
@@ -74,7 +86,7 @@ def get_item_info():
     info_dict = {}
     group_id = request.args.get('id', 0, type=int)
     group = CredentialGroup.query.filter_by(id=group_id).first()
-    credential_list = get_group_credentials(group_id)
+    credential_list = credential_manager.get_group_credentials(group_id)
     info_dict["group_id"] = group_id
     info_dict["description"] = group.description
     info_dict["service_name"] = group.service_name
@@ -93,7 +105,7 @@ def get_item_info():
 def delete_groups():
     group_id_list = request.get_json().get('group_ids')
     for group_id in group_id_list:
-        remove_credentials(group_id)
+        credential_manager.remove_credentials(group_id)
         # logger.debug(group_id)
     flash("Successfully removed items ayylmao", category="success")
     return json.dumps({'success': True}), 200, {'ContentType': 'application/json'}

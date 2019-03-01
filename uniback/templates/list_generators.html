@@ -25,7 +25,7 @@
                     <input type="checkbox" class="list-checkbox" autocomplete="off" value="{{group['group_id']}}" id="{{group['group_id']}}-box">
                 </div>
                 <div class="list-content-group">
-                    <div class="list-content">
+                    <div class="list-content col-15">
                         Service name: {{group['service_name']}}<br>
                         Description: {{group['description']}}
                     </div>
@@ -46,10 +46,18 @@
 {% macro item_select_script(info_script_location) %}
 <script>
     $( ".list-checkbox-div" ).css("display", "block");
-    $( ".list-content-group").click(function() {
-        deselectAllItems();
+    $( ".list-content-group" ).click(function() {
         var groupId = $(this).parent().attr("id");
-        $( "#" + groupId + "-box" ).prop( "checked", true );
+        // get the value of the clicked item's checkbox so we can check it
+        // when deciding whether to deselect it
+        var itemChecked = $( "#" + groupId + "-box" ).prop( "checked" )
+        deselectAllItems();
+        if (itemChecked)
+        {
+            $( "#" + groupId + "-box" ).prop( "checked", false );
+        } else {
+            $( "#" + groupId + "-box" ).prop( "checked", true );
+        }
         $( "#" + groupId + "-box" ).change();
     });
 
@@ -181,4 +189,39 @@
             </li>
         {% endfor %}
     </ul>
+{% endmacro %}
+
+{% macro generate_process_list(processes) %}
+    <span class="list-group-header">
+        <div class="list-content col-1">Check</div>
+        <div class="list-content col-2">Name</div>
+        <div class="list-content col-2">Category</div>
+        <div class="list-content col-2">Status</div>
+        <div class="list-content col-2">Process Id</div>
+    </span>
+    <ul class="list-group">
+        {% for process in processes %}
+            <li class="list-group-item" id="{{process['pid']}}">
+                <div class="list-checkbox-div">
+                    {# autocomplete=off so that checkbox doesn't stay checked after refresh #}
+                    <input type="checkbox" class="list-checkbox" autocomplete="off" value="{{process['pid']}}" id="{{process['pid']}}-box">
+                </div>
+                <div class="list-content-group">
+                    <div class="inline-list-content col-2">
+                        {{process['name']}}
+                    </div>
+                    <div class="inline-list-content col-2">
+                        {{process['category']}}
+                    </div>
+                    <div class="inline-list-content col-2">
+                        {{process['status']}}
+                    </div>
+                    <div class="inline-list-content col-2">
+                        {{process['pid']}}
+                    </div>
+                </div>
+            </li>
+        {% endfor %}
+    </ul>
+    {{ item_select_script('/settings/processes/_get_process_info') }}
 {% endmacro %}

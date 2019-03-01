@@ -16,3 +16,7 @@ class CredentialsLockedException(Exception):
 
 class BSNotSupportedException(Exception):
     pass
+
+
+class UBInitFailure(Exception):
+    pass

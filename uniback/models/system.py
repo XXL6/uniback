@@ -11,6 +11,17 @@ class SysVars(db.Model):
     var_data = db.Column(db.String(100), nullable=True)
 
 
+# We have a separate system variable table that exists only in
+# memory for certain variable sharing between processes
+class SysVarsMemory(db.Model):
+    __bind_key__ = 'memory'
+    __tablename__ = 'sys_vars_memory'
+    id = db.Column(db.Integer, primary_key=True)
+    # JSON might be better but SQLite doesn't seem to support it
+    var_name = db.Column(db.String(100), nullable=False)
+    var_data = db.Column(db.String(100), nullable=True)
+
+
 class CredentialStore(db.Model):
     __bind_key__ = 'system'
     __tablename__ = 'credential_store'
