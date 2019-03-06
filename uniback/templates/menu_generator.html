@@ -45,7 +45,10 @@
 </script>
 {% endmacro %}
 
-{% macro generate_action_menu(action_item_list, action_script_location) %}
+{# we can use this to generate a simple action menu for list items
+    the action menu can include functionality of deleting items, adding new
+    items, editing items, and other such things #}
+{% macro generate_action_menu(action_item_list, action_script_root) %}
 <div class="action-menu">
     {% for variant, item_list in action_item_list.items() %}
     <ul class='variant-{{variant}} action-menu-item-list'>
@@ -67,9 +70,9 @@
                 var itemsToDelete = getCheckedItemIds();
                 $.ajax({
                     type: "POST",
-                    url: $SCRIPT_ROOT + "{{action_script_location|safe}}",
+                    url: $SCRIPT_ROOT + "{{action_script_root + '_delete'|safe}}",
                     contentType: "application/json",
-                    data: JSON.stringify({group_ids: itemsToDelete}),
+                    data: JSON.stringify({item_ids: itemsToDelete}),
                     dataType: "json",
                     success: function(response) {
                         location.reload();
@@ -79,14 +82,31 @@
                     }
                 });
                 break;
+            case "edit":
+                // should only have one item checked in the 'edit' function which is why we only get the first item
+                var itemToEdit = getCheckedItemIds()[0];
+                /*$.get($SCRIPT_ROOT + "{{action_script_root + '_edit'|safe}}", {
+                        item_id: item_id
+                    }, function(data) {
+                        populateSidebar(data);
+                    }
+                );*/
+                window.location.replace("{{ action_script_root + '_edit/' }}" + itemToEdit)
+                break;
             default:
-                alert("No ayyliens here lmao");
+                alert("Unsupported function");
         }
     }
-
+    
+    // chooses which action menu variant to display
+    // variants are essentially based on how many list items are selected
+    // if no items selected, variant is 0
+    // if 1 item is selected, variant is 1
+    // if 2+ items are selected, variant is 2
     function displayActionMenuVariant(variant) {
         $( ".action-menu-item-list" ).css("display", "none");
         $( ".action-menu-item-list.variant-" + variant.toString()).css("display", "inline-block");
+        $( ".action-menu-item-list.variant-3" ).css("display", "inline-block");
     }
 </script>
 {% endmacro %}

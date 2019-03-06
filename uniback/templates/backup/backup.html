@@ -8,12 +8,12 @@
 {% from "menu_generator.html" import generate_menu, generate_sidebar %}
 {% block tab_content %}
     {{ generate_menu(menu_list, active_menu, 'Backup') }}
-    <!--<div class="wrapper">-->
-        <div class="menu-content">
+    <div class="flex-wrapper">
+        <div class="flex-col menu-content">
             {% block menu_content %}
             {% endblock menu_content %}
             {{ render_flashed_messages() }}
         </div>
         {{ generate_sidebar() }}
-    <!--</div>-->
+    </div>
 {% endblock tab_content %}

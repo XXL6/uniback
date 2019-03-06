@@ -28,7 +28,6 @@ class ProcessManager:
         if current_process().name == "MainProcess":
             self.create_purger()
             self.create_queue_monitor()
-            pass
 
     def add_process(self, input_process):
         self.logger.debug(f"Starting process {input_process.ub_name}")
@@ -42,8 +41,7 @@ class ProcessManager:
         except AttributeError:
             pass  # don't actually need to do anything
             # if the methods don't exist
-        # processes are spawned by creating a Process object and
-        # then calling its start() method
+
         # ALL class initializations/assignments must be done
         # before the start() method because after start()
         # the only way to communicate with the class is through
@@ -90,6 +88,7 @@ class ProcessManager:
         for process in self.process_list:
             if process.ub_name == name:
                 return True
+        return False
 
     # terminates all known child processes
     def kill_all_processes(self):
@@ -100,6 +99,8 @@ class ProcessManager:
 
     # kills all worker processes. Basically processes that aren't system
     # processes
+    # unnecessary now since what used to be the system processes will
+    # now be running as threads instead
     def kill_all_workers(self):
         self.t_lock.acquire()
         for process in self.process_list:
@@ -155,6 +156,8 @@ class ProcessManager:
     # multiple processes will be putting stuff in the queue all the time
     # so we create a thread to manage all the data coming in and assign it
     # to their respective processes
+    # currently the data is mainly just different status variables
+    # of the process
     def create_queue_monitor(self, monitor_name="Queue Monitor"):
         self.queue_monitor = Thread(target=self.monitor_queue,
                                     name=monitor_name, daemon=True)
@@ -164,6 +167,7 @@ class ProcessManager:
         while not self.manager_exiting:
             # we set a timeout on the queue so that it doesn't keep blocking
             # in case the application needs to exit
+            # probably unnecessary since the thread is now a daemon
             try:
                 temp_dict = self.queue.get(timeout=10)
             except QueueEmptyException:

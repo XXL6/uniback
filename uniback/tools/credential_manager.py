@@ -1,24 +1,24 @@
 from os import environ
 from uniback.models.system import CredentialStore, SysVars,\
-    CredentialGroup, SysVarsMemory
+    CredentialGroup
 from uniback.dictionary.uniback_constants import Credential
 from uniback.dictionary.uniback_exceptions import CredentialsLockedException
 from sqlalchemy import exc, create_engine
 from sqlalchemy.orm import sessionmaker
-from Crypto.Cipher import AES
+import uniback.tools.crypt_tools as crypt_tools
 import logging
 import bcrypt
-from multiprocessing import current_process
 from sqlalchemy.exc import OperationalError
+import traceback
 
 
 class CredentialManager():
 
     def __init__(self):
         self.logger = logging.getLogger('mainLogger')
-        engine = create_engine('sqlite:///../ub_system.db')
-        Session = sessionmaker(bind=engine)
-        self.session = Session()
+        # engine = create_engine('sqlite:///uniback/ub_system.db')
+        # Session = sessionmaker(bind=engine)
+        # self.session = Session()
         # if the database is encrypted we want to say that it's
         # locked as well on initialization, but if the database
         # is not encrypted, then the credentials would not be locked
@@ -29,11 +29,21 @@ class CredentialManager():
         try:
             self._credentials_locked = self.credentials_encrypted()
         except OperationalError:
+            # self.logger.warning(traceback.format_exc())
+            self.logger.error("Operational Error still")
             self._credentials_locked = False
         except AttributeError:
+            # self.logger.warning(traceback.format_exc())
+            self.logger.warning("Attribute error thingy")
             self._credentials_locked = False
         # crypt key kept in memory
         self.crypt_key = ""
+
+    def get_local_session(self):
+        engine = create_engine('sqlite:///uniback/ub_system.db')
+        Session = sessionmaker(bind=engine)
+        session = Session()
+        return session
 
     def assign_session(self, session):
         self.session = session
@@ -44,28 +54,63 @@ class CredentialManager():
                               f"role={credential_role} as "
                               "credential store is encrypted and locked")
             raise CredentialsLockedException
-        credential = self.session.query(CredentialStore).filter_by(
+        session = self.get_local_session()
+        credential = session.query(CredentialStore).filter_by(
+                                            credential_role=credential_role,
+                                            group_id=group_id).first()
+        credential_data = credential.credential_data
+        session.close()
+        if credential:
+            print(credential.credential_data)
+            if self.credentials_encrypted():
+                decryption_key = self.get_crypt_key()
+                if decryption_key is None:
+                    self.logger.error(f"Credential database marked as "
+                                      "unlocked but no key provided")
+                    raise Exception("No password specified for credential store")
+                credential_data = crypt_tools.decrypt_string(
+                    credential_data, decryption_key)
+            return credential_data
+        else:
+            return ""
+
+    def set_credential(self, group_id, credential_role, credential_data):
+        if self.credentials_encrypted() and self.credentials_locked():
+            self.logger.error(f"Could not set credential data for "
+                              f"role={credential_role} as "
+                              "credential store is encrypted and locked")
+            raise CredentialsLockedException
+        session = self.get_local_session()
+        credential = session.query(CredentialStore).filter_by(
                                             credential_role=credential_role,
                                             group_id=group_id).first()
         if self.credentials_encrypted():
-            decryption_key = self.get_crypt_key()
-            if decryption_key is None:
+            encryption_key = self.get_crypt_key()
+            if encryption_key is None:
                 self.logger.error(f"Credential database marked as "
                                   "unlocked but no key provided")
+                session.close()
                 raise Exception("No password specified for credential store")
-            self.decrypt_string(credential.credential_data,
-                                self.get_crypt_key())
-        return credential.credential_data
+            credential.credential_data = (crypt_tools.encrypt_string(
+                credential_data,
+                encryption_key)
+            )
+        else:
+            credential.credential_data = credential_data
+        session.commit()
+        session.close()
 
     # returns a list of credential objects belonging to a certain group
     def get_group_credentials(self, group_id):
         if self.credentials_encrypted() and self.credentials_locked():
             self.logger.error(f"Could not get credentials for group="
-                              "{group_id} as credential store is "
+                              f"{group_id} as credential store is "
                               "encrypted and locked")
             raise CredentialsLockedException
-        credentials = self.session.query(CredentialStore).filter_by(
+        session = self.get_local_session()
+        credentials = session.query(CredentialStore).filter_by(
             group_id=group_id)
+        return_credentials = []
         if self.credentials_encrypted():
             decryption_key = self.get_crypt_key()
             if decryption_key is None:
@@ -73,17 +118,22 @@ class CredentialManager():
                                   "unlocked but no key provided")
                 raise Exception("No password specified for credential store")
             for credential in credentials:
-                credential.credential_data = self.decrypt_string(
-                    credential.credential_data, decryption_key)
-        return credentials
+                return_credentials.append({'credential_role': credential.credential_role, 'credential_data': crypt_tools.decrypt_string(
+                    credential.credential_data, decryption_key)})
+        else:
+            for credential in credentials:
+                return_credentials.append({'credential_role': credential.credential_role, 'credential_data': credential.credential_data})
+        session.close()
+        return return_credentials
 
     def get_all_credential_groups(self):
         if self.credentials_encrypted() and self.credentials_locked():
             self.logger.error("Could not retrieve credentials while "
                               "the credential database is locked.")
-            raise CredentialsLockedException
+            return []
         group_list = []
-        credential_groups = self.session.query(CredentialGroup).order_by(
+        session = self.get_local_session()
+        credential_groups = session.query(CredentialGroup).filter(CredentialGroup.id > 0).order_by(
             CredentialGroup.id.asc())
         for group in credential_groups:
             temp_group = dict(
@@ -92,31 +142,39 @@ class CredentialManager():
                 group_id=group.id,
             )
             group_list.append(temp_group)
+        session.close()
         return group_list
 
     def credentials_encrypted(self):
-        encrypted = self.session.query(SysVars).filter_by(
+        session = self.get_local_session()
+        encrypted = session.query(SysVars).filter_by(
             var_name=Credential.CREDENTIAL_DB_ENCRYPTED).first()
-        return encrypted.var_data == '1'
+        session.close()
+        if encrypted:
+            return encrypted.var_data == '1'
+        else:
+            return False
 
     def credentials_locked(self):
 #        locked = self.session2.query(SysVarsMemory).filter_by(
 #            var_name="CREDENTIAL_DATABASE_ENCRYPTED").first()
 #        return locked.var_data == '1'
-        return False
+        return self._credentials_locked
 
     def set_credentials_encrypted(self, set_encrypted):
-        encrypted = self.session.query(SysVars).filter_by(
+        session = self.get_local_session()
+        encrypted = session.query(SysVars).filter_by(
             var_name=Credential.CREDENTIAL_DB_ENCRYPTED).first()
         encrypted.var_data = '1' if set_encrypted else '0'
-        self.session.commit()
+        session.commit()
+        session.close()
 
     def set_credentials_locked(self, set_locked):
  #       locked = self.session2.query(SysVarsMemory).filter_by(
  #           var_name="CREDENTIAL_DATABASE_ENCRYPTED").first()
  #       locked.var_data = '1' if set_locked else '0'
  #       self.session.commit()
-        pass
+        self._credentials_locked = set_locked
 
     def encrypt_credentials(self, encryption_key):
         if self.credentials_encrypted() or self.credentials_locked():
@@ -124,26 +182,36 @@ class CredentialManager():
                               "however, the database is already encrypted "
                               "or locked")
             raise CredentialsLockedException
-        
+        self.set_crypt_key(encryption_key)
+        encryption_key = self.get_crypt_key()
+        session = self.get_local_session()
+        try:
+            # we do not encrypt group_id of 0 as that's the built-in group
+            # to check the validity of encryption password
+            credential_list = session.query(CredentialStore).filter(
+                CredentialStore.group_id > 0)
+        except exc.SQLAlchemyError as e:
+            self.logger.error(f"Failure to query credential database. {e}")
+            session.close()
+            raise
+        for instance in credential_list:
             try:
-                # we do not encrypt group_id of 0 as that's the built-in group
-                # to check the validity of encryption password
-                credential_list = self.session.query(CredentialStore).filter(
-                    CredentialStore.group_id > 0)
-            except exc.SQLAlchemyError as e:
-                self.logger.error(f"Failure to query credential database. {e}")
-                raise
-            for instance in credential_list:
-                encrypted_credential = self.encrypt_string(
+                encrypted_credential = crypt_tools.encrypt_string(
                     instance.credential_data, encryption_key)
                 instance.credential_data = encrypted_credential
-            try:
-                self.session.commit()
             except Exception as e:
-                self.logger.error(
-                    f"Failure to commit encrypted credential changes. {e}")
-                raise
-        self.set_crypt_key(encryption_key)
+                self.logger.error("Failed to encrypt credential database.")
+                self.logger.error(e)
+                raise Exception("Failed to encrypt credential database.")
+        try:
+            session.commit()
+        except Exception as e:
+            self.logger.error(
+                f"Failure to commit encrypted credential changes. {e}")
+            session.close()
+            raise
+        session.close()
+        self.store_crypt_key(encryption_key)
         # once all the checks complete we can conclude that the database
         # is now encrypted
         self.set_credentials_encrypted(True)
@@ -156,62 +224,70 @@ class CredentialManager():
             self.logger.error("Cannot decrypt credentials as the database "
                               "is locked.")
             raise CredentialsLockedException
-        else:
-            decryption_key = self.get_crypt_key()
-            try:
-                # we do not decrypt group_id of 0 as that's the 
-                # built-in group to check the validity 
-                # of encryption password
-                credential_list = (self.session.query(CredentialStore).
-                                   filter(CredentialStore.group_id > 0))
-            except exc.InvalidRequestError as e:
-                self.logger.error(f"Failure to query credential database.")
-                raise e
-            except exc.SQLAlchemyError as e:
-                self.logger.error(f"General DB error.")
-                raise e
-            for instance in credential_list:
-                decrypted_credential = self.decrypt_string(
-                    instance.credential_data, decryption_key)
-                instance.credential_data = decrypted_credential
-            try:
-                self.session.commit()
-            except exc.InvalidRequestError as e:
-                self.logger.error(
-                    f"Failure to commit decrypted credential changes.")
-                raise e
-            except exc.SQLAlchemyError as e:
-                self.logger.error(f"General DB error.")
-                raise e
-            self.set_crypt_key("")
-            self.store_crypt_key("")
-            # once all the checks complete we can conclude that the database
-            # is now decrypted
-            self.set_credentials_encrypted(False)
+        decryption_key = self.get_crypt_key()
+        session = self.get_local_session()
+        try:
+            # we do not decrypt group_id of 0 as that's the
+            # built-in group to check the validity
+            # of encryption password
+            credential_list = (session.query(CredentialStore).
+                               filter(CredentialStore.group_id > 0))
+        except exc.InvalidRequestError as e:
+            self.logger.error(f"Failure to query credential database.")
+            session.close()
+            raise e
+        except exc.SQLAlchemyError as e:
+            self.logger.error(f"General DB error.")
+            session.close()
+            raise e
+        for instance in credential_list:
+            decrypted_credential = crypt_tools.decrypt_string(
+                instance.credential_data, decryption_key)
+            instance.credential_data = decrypted_credential
+        try:
+            session.commit()
+        except exc.InvalidRequestError as e:
+            self.logger.error(
+                f"Failure to commit decrypted credential changes.")
+            session.close()
+            raise e
+        except exc.SQLAlchemyError as e:
+            self.logger.error(f"General DB error.")
+            session.close()
+            raise e
+        session.close()
+        self.set_crypt_key("")
+        self.store_crypt_key("")
+        # once all the checks complete we can conclude that the database
+        # is now decrypted
+        self.set_credentials_encrypted(False)
 
     # Basically if the encryption/decryption key is not currently set
     # the database is considered to be locked as the credential data
     # can no longer be decrypted on the fly
     def lock_credentials(self):
-        try:
-            environ.unsetenv(Credential.CREDENTIAL_ENVIRONMENT_VAR_NAME)
-        except Exception as e:
-            self.logger.error(f'Failed to lock credentials.')
-            raise e
+        # try:
+        #    environ.unsetenv(Credential.CREDENTIAL_ENVIRONMENT_VAR_NAME)
+        # except Exception as e:
+        #    self.logger.error(f'Failed to lock credentials.')
+        #    raise e
+        self.set_crypt_key("")
         self.set_credentials_locked(True)
 
     def unlock_credentials(self, key):
+        session = self.get_local_session()
         try:
-            hashed_key = self.session.query(CredentialStore).filter_by(
+            hashed_key = session.query(CredentialStore).filter_by(
                 group_id=0).first().credential_data
         except Exception as e:
             self.logger.error(f"Failure to query credential database "
                               "while unlocking credentials.")
             raise e
-        if not bcrypt.check_password_hash(hashed_key, key):
+        if not bcrypt.checkpw(key.encode('utf-8'), hashed_key):
             self.logger.error(f"Wrong password provided for "
                               "credential unlocking")
             raise
+        session.close()
         self.set_crypt_key(key)
         self.set_credentials_locked(False)
 
@@ -230,14 +306,16 @@ class CredentialManager():
         #    var_name=Credential.CREDENTIAL_ENVIRONMENT_VAR_NAME).first()
         # crypt_key.var_data = key
         # self.session.commit()
+        # self.crypt_key = bcrypt.hashpw(str.encode(key), self.test_salt)
         self.crypt_key = key
 
     # stores and encrypts they key in the database using bcrypt
     # this way we can see whether the user input the right key
     # to unlock the database without having to store the key itself
     def store_crypt_key(self, key):
+        session = self.get_local_session()
         try:
-            credential = self.session.query(CredentialStore).filter_by(
+            credential = session.query(CredentialStore).filter_by(
                     credential_role=Credential.CREDENTIAL_KEY_ROLE_NAME,
                     group_id=0).first()
         except exc.InvalidRequestError as e:
@@ -248,7 +326,7 @@ class CredentialManager():
             self.logger.error("General DB error.")
             raise e
         try:
-            credential_group = (self.session.query(CredentialGroup).
+            credential_group = (session.query(CredentialGroup).
                                 filter_by(id=0).first())
         except exc.InvalidRequestError as e:
             self.logger.error(f"Failure to query credential database "
@@ -257,7 +335,7 @@ class CredentialManager():
         except exc.SQLAlchemyError as e:
             self.logger.error("General DB error.")
             raise e
-        if credential_group and credential_group.description != \
+        if credential_group and credential_group.service_name != \
                 Credential.CREDENTIAL_KEY_GROUP_NAME:
             self.logger.error(f"Wrong item in id=0 location of the "
                               "credential group table.")
@@ -268,7 +346,7 @@ class CredentialManager():
                 description=Credential.CREDENTIAL_KEY_GROUP_NAME,
                 service_name=Credential.CREDENTIAL_KEY_GROUP_NAME)
             try:
-                self.session.add(new_credential_group)
+                session.add(new_credential_group)
             except exc.InvalidRequestError as e:
                 self.logger.error(f"Failure to add new credential group "
                                   "to the database.")
@@ -277,12 +355,18 @@ class CredentialManager():
                 self.logger.error("General DB error.")
                 raise e
         if not credential:
-            new_credential = CredentialStore(
-                group_id=0,
-                credential_role=Credential.CREDENTIAL_KEY_ROLE_NAME,
-                credential_data=bcrypt.generate_password_hash(key))
+            if key != "":
+                new_credential = CredentialStore(
+                    group_id=0,
+                    credential_role=Credential.CREDENTIAL_KEY_ROLE_NAME,
+                    credential_data=bcrypt.hashpw(key.encode('utf-8'), bcrypt.gensalt()))
+            else:
+                new_credential = CredentialStore(
+                    group_id=0,
+                    credential_role=Credential.CREDENTIAL_KEY_ROLE_NAME,
+                    credential_data="")
             try:
-                self.session.add(new_credential)
+                session.add(new_credential)
             except exc.InvalidRequestError as e:
                 self.logger.error(f"Failure to add the credential "
                                   "password hash to the credential "
@@ -291,25 +375,24 @@ class CredentialManager():
             except exc.SQLAlchemyError as e:
                 self.logger.error("General DB error.")
                 raise e
-        self.session.commit()
-
-    def encrypt_string(self, input_string, key):
-        enc = AES.new(key, AES.MODE_CFB)
-        return enc.encrypt(input_string)
-
-    def decrypt_string(self, input_string, key):
-        enc = AES.new(key, AES.MODE_CFB)
-        return enc.decrypt(input_string)
+        else:
+            if key != "":
+                credential.credential_data = bcrypt.hashpw(key.encode('utf-8'), bcrypt.gensalt())
+            else:
+                credential.credential_data = ""
+        session.commit()
+        session.close()
 
     # removes all credential keys and groups
     # essentially has to be done if user encrypts
     # their database and forgets their password
     def reset_database(self):
+        session = self.get_local_session()
         try:
             credentials_deleted = self.session.query(CredentialStore).filter(
                 CredentialStore.group_id > 0).\
                 delete(synchronize_session=False)
-            self.session.commit()
+            session.commit()
         except exc.InvalidRequestError as e:
             self.logger.error(f"Failed to delete CredentialStore entries.")
             raise e
@@ -320,7 +403,7 @@ class CredentialManager():
             credential_groups_deleted = (self.session.query(CredentialGroup).
                                          filter(CredentialGroup.id > 0).
                                          delete(synchronize_session=False))
-            self.session.commit()
+            session.commit()
         except exc.InvalidRequestError as e:
             self.logger.error(f"Failed to reset CredentialGroup database.")
             raise e
@@ -330,6 +413,7 @@ class CredentialManager():
         self.logger.info(f"[{credentials_deleted}] credentials deleted "
                          f" and [{credential_groups_deleted}] credential "
                          "groups deleted")
+        session.close()
         self.set_credentials_encrypted(False)
         self.set_credentials_locked(False)
         self.set_crypt_key("")
@@ -343,50 +427,54 @@ class CredentialManager():
     # service name, it adds the group and then uses the newly
     # created group's id to create the credential
     def add_credential(self, service_name, credential_role, credential_data):
+        session = self.get_local_session()
         if self.credentials_locked():
             self.logger.error(f"Unable to add [{credential_role}] "
                               f"for [{service_name}] as the credential "
                               "database is locked")
             raise CredentialsLockedException
         
-            try:
-                credential_group = (self.session.query(CredentialGroup).
-                                    filter_by(service_name=service_name))
-            except exc.InvalidRequestError as e:
-                self.logger.error("Failed to query credential group database "
-                                  "while adding new credential.")
-                raise e
-            except exc.SQLAlchemyError as e:
-                self.logger.error("General DB error.")
-                raise e
-            if credential_group:
-                group_id = credential_group.id
-            else:
-                credential_group = CredentialGroup(service_name=service_name)
-                self.session.add(credential_group)
-                self.session.commit()
-                group_id = credential_group.id
-            new_credential = CredentialStore(
-                credential_role=credential_role,
-                credential_data=credential_data,
-                group_id=group_id)
-            if self.credentials_encrypted():
-                new_credential.credential_data = self.encrypt_string(
-                    new_credential.credential_data,
-                    self.get_crypt_key()
-                )
-            self.session.add(new_credential)
-            self.session.commit()
+        try:
+            credential_group = (session.query(CredentialGroup).
+                                filter_by(service_name=service_name).first())
+        except exc.InvalidRequestError as e:
+            self.logger.error("Failed to query credential group database "
+                              "while adding new credential.")
+            raise e
+        except exc.SQLAlchemyError as e:
+            self.logger.error("General DB error.")
+            raise e
+        if credential_group:
+            group_id = credential_group.id
+        else:
+            credential_group = CredentialGroup(service_name=service_name)
+            session.add(credential_group)
+            session.commit()
+            group_id = credential_group.id
+        new_credential = CredentialStore(
+            credential_role=credential_role,
+            credential_data=credential_data,
+            group_id=group_id)
+        if self.credentials_encrypted():
+            new_credential.credential_data = crypt_tools.encrypt_string(
+                new_credential.credential_data,
+                self.get_crypt_key()
+            )
+        session.add(new_credential)
+        session.commit()
+        session.close()
         return group_id
 
     # Removes all credentials belonging to a certain group including
     # the group itself
     def remove_credentials(self, group_id):
-        credentials_deleted = self.session.query(CredentialStore).filter_by(
+        session = self.get_local_session()
+        credentials_deleted = session.query(CredentialStore).filter_by(
             group_id=group_id).delete(synchronize_session=False)
-        credential_group = self.session.query(CredentialGroup).filter_by(
+        credential_group = session.query(CredentialGroup).filter_by(
             id=group_id).delete(synchronize_session=False)
-        self.session.commit()
+        session.commit()
+        session.close()
         if credentials_deleted > 0:
             self.logger.info(f"{credentials_deleted} credentials "
                              f"with group id of {group_id} have been deleted.")
@@ -402,12 +490,26 @@ class CredentialManager():
 
     # sets a description to a credential group
     def set_group_description(self, group_id, description):
-        credential_group = self.session.query(CredentialGroup).filter_by(
+        session = self.get_local_session()
+        credential_group = session.query(CredentialGroup).filter_by(
             id=group_id
-        )
+        ).first()
         if not credential_group:
             self.logger.error(f"Unable to set description to "
-                              "group {group_id}")
+                              f"group {group_id}")
             raise Exception
         credential_group.description = description
-        self.session.commit()
+        session.commit()
+        session.close()
+
+    def get_group_description(self, group_id):
+        session = self.get_local_session()
+        credential_group = session.query(CredentialGroup).filter_by(
+            id=group_id
+        ).first()
+        session.close()
+        if not credential_group:
+            self.logger.warning(f"Could not get group description for "
+                                f"group {group_id}.")
+            return ""
+        return credential_group.description

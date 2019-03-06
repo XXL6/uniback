@@ -13,7 +13,6 @@ from multiprocessing import current_process
 ub_logging.initialize_logging()
 db = SQLAlchemy()
 process_manager = ProcessManager()
-credential_manager = None
 login_manager = LoginManager()
 login_manager.login_view = 'users.login'
 login_manager.login_message_category = 'info'

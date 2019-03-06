@@ -14,7 +14,6 @@ def create_app(config_class=Config):
         db.create_all()
         init_db()
     credential_manager.assign_session(db.session)
-    credential_manager.set_crypt_key("ayy")
     from uniback.blueprints.main.routes import main
     from uniback.blueprints.jobs.routes import jobs
     from uniback.blueprints.users.routes import users

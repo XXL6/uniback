@@ -3,7 +3,6 @@ import logging.handlers
 from logging.config import fileConfig
 import os
 
-
 def initialize_logging():
     config_file_dir = os.path.realpath(__name__)
     head, tail = os.path.split(config_file_dir)
