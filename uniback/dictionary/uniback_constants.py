@@ -12,7 +12,9 @@ class JobStatusFinished:
 
 
 class BackupSetTypes:
-    BS_TYPE_FILESFOLDERS = 0
+    BS_TYPE_FOLDERS = 0
+    BS_TYPE_FOLDERS_DESC = "Folders"
+    BS_TYPE_FILESFOLDERS = 1
     BS_TYPE_FILESFOLDERS_DESC = "Files and Folders"
 
 
@@ -25,3 +27,13 @@ class Credential:
 
 class System:
     DB_INITIALIZED_VAR_NAME = "DB_INITIALIZED"
+
+
+class PhysicalLocation:
+    UB_FOLDER_NAME = "UB_Location"
+
+
+class PhysicalLocationTypes:
+    LOCATION_TYPE_LOCAL = 1
+    LOCATION_TYPE_LOCAL_DESC = "Local"
+

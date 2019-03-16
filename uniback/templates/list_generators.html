@@ -229,3 +229,73 @@
     </ul>
     {{ item_select_script('/settings/processes/_get_process_info') }}
 {% endmacro %}
+
+{% macro generate_physical_location_list(locations) %}
+    <span class="list-group-header">
+        <div class="list-content col-1">Check</div>
+        <div class="list-content col-1">Id</div>
+        <div class="list-content col-2">Name</div>
+        <div class="list-content col-5">Address</div>
+        <div class="list-content col-2">Type</div>
+        <div class="list-content col-2">Status</div>
+    </span>
+    <ul class="list-group">
+        {% for location in locations %}
+            <li class="list-group-item" id="{{location['id']}}">
+                <div class="list-checkbox-div">
+                    {# autocomplete=off so that checkbox doesn't stay checked after refresh #}
+                    <input type="checkbox" class="list-checkbox" autocomplete="off" value="{{location['id']}}" id="{{location['id']}}-box">
+                </div>
+                <div class="list-content-group">
+                    <div class="inline-list-content col-1">
+                        {{location['id']}}
+                    </div>
+                    <div class="inline-list-content col-2">
+                        {{location['name']}}
+                    </div>
+                    <div class="inline-list-content col-5">
+                        {{location['address']}}
+                    </div>
+                    <div class="inline-list-content col-2">
+                        {{location['type']}}
+                    </div>
+                    <div class="inline-list-content col-2">
+                        {{location.get('status')}}
+                    </div>
+                </div>
+            </li>
+        {% endfor %}
+    </ul>
+    {{ item_select_script('/repositories/physical_locations/_get_location_info') }}
+{% endmacro %}
+
+{% macro generate_repository_list(repositories) %}
+    <span class="list-group-header">
+        <div class="list-content col-1">Check</div>
+        <div class="list-content col-1">Id</div>
+        <div class="list-content col-2">Name</div>
+        <div class="list-content col-2">Engine</div>
+    </span>
+    <ul class="list-group">
+        {% for repository in repositories %}
+            <li class="list-group-item" id="{{repository['id']}}">
+                <div class="list-checkbox-div">
+                    {# autocomplete=off so that checkbox doesn't stay checked after refresh #}
+                    <input type="checkbox" class="list-checkbox" autocomplete="off" value="{{repository['id']}}" id="{{repository['id']}}-box">
+                </div>
+                <div class="list-content-group">
+                    <div class="inline-list-content col-1">
+                        {{repository['id']}}
+                    </div>
+                    <div class="inline-list-content col-2">
+                        {{repository['name']}}
+                    </div>
+                    <div class="inline-list-content col-5">
+                        {{repository['engine']}}
+                    </div>
+                </div>
+            </li>
+        {% endfor %}
+    </ul>
+    {{ item_select_script('/repositories/repository_list/_get_repository_info') }}
+{% endmacro %}

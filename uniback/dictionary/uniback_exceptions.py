@@ -20,3 +20,7 @@ class BSNotSupportedException(Exception):
 
 class UBInitFailure(Exception):
     pass
+
+
+class JobQueueFullException(Exception):
+    pass

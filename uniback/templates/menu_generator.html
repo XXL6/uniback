@@ -93,6 +93,9 @@
                 );*/
                 window.location.replace("{{ action_script_root + '_edit/' }}" + itemToEdit)
                 break;
+            case "add":
+                window.location.replace("{{ action_script_root + '_add' }}")
+                break;
             default:
                 alert("Unsupported function");
         }
@@ -103,6 +106,7 @@
     // if no items selected, variant is 0
     // if 1 item is selected, variant is 1
     // if 2+ items are selected, variant is 2
+    // variant 3 is always visible
     function displayActionMenuVariant(variant) {
         $( ".action-menu-item-list" ).css("display", "none");
         $( ".action-menu-item-list.variant-" + variant.toString()).css("display", "inline-block");

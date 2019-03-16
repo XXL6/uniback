@@ -1,7 +1,7 @@
 {% extends "repositories/repositories.html" %}
-{% set active_menu = "repository_list" %}
+{% set active_menu = "physical_locations" %}
 {% from "menu_generator.html" import generate_action_menu, generate_sidebar %}
-{% from "list_generators.html" import generate_repository_list %}
+{% from "list_generators.html" import generate_physical_location_list %}
 {% set action_menu_list = {
     '0': [
     ],    
@@ -18,6 +18,6 @@
 }
 -%}
 {% block menu_content %}
-    {{ generate_action_menu(action_menu_list, '/repositories/repository_list/') }}
-    {{ generate_repository_list(repositories) }}
+    {{ generate_action_menu(action_menu_list, '/repositories/physical_locations/') }}
+    {{ generate_physical_location_list(locations) }}
 {% endblock menu_content %}

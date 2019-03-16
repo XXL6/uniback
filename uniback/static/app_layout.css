@@ -58,6 +58,10 @@
     grid-column: span 3;
 }
 
+.col-5 {
+    grid-column: span 5;
+}
+
 .col-6 {
     grid-column: span 6;
 }
@@ -142,4 +146,10 @@
     display: flex;
     width: 100%;
     grid-column: span 17;
+}
+
+.ub-form {
+    /*display: grid;
+    grid-template-columns: repeat(8, 1fr);*/
+    max-width: 500px;
 }

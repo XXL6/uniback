@@ -1,5 +1,5 @@
 from os import environ
-from uniback.models.system import CredentialStore, SysVars,\
+from uniback.models.general import CredentialStore, SysVars,\
     CredentialGroup
 from uniback.dictionary.uniback_constants import Credential
 from uniback.dictionary.uniback_exceptions import CredentialsLockedException
@@ -40,7 +40,7 @@ class CredentialManager():
         self.crypt_key = ""
 
     def get_local_session(self):
-        engine = create_engine('sqlite:///uniback/ub_system.db')
+        engine = create_engine('sqlite:///uniback/ub_general.db')
         Session = sessionmaker(bind=engine)
         session = Session()
         return session

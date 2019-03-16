@@ -1,5 +1,5 @@
 from uniback import db, bcrypt
-from uniback.models.system import CredentialGroup, CredentialStore, SysVars
+from uniback.models.general import CredentialGroup, CredentialStore, SysVars
 from uniback.dictionary.uniback_constants import System, Credential
 from uniback.blueprints.users.models import User
 from sqlalchemy.exc import OperationalError

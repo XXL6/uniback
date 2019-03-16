@@ -30,13 +30,12 @@ class ProcessManager:
             self.create_queue_monitor()
 
     def add_process(self, input_process):
-        self.logger.debug(f"Starting process {input_process.ub_name}")
+        self.logger.debug(f"Starting process {input_process.name}")
         self.t_lock.acquire()
         self.process_list.append(input_process)
         self.t_lock.release()
         try:
             input_process.assign_queue(self.queue)
-            input_process.assign_data_manager(self.data_manager)
             input_process.assign_logger(self.logger)
         except AttributeError:
             pass  # don't actually need to do anything
@@ -56,8 +55,8 @@ class ProcessManager:
         self.t_lock.acquire()
         for process in self.process_list:
             return_list.append({
-                'name': process.ub_name,
-                'category': process.ub_category,
+                'name': process.name,
+                'category': process.category,
                 'status': "running" if process.is_alive()
                 else "stopped",
                 'pid': process.pid
@@ -86,8 +85,16 @@ class ProcessManager:
     # is there a process with a certain name?
     def process_exists(self, name):
         for process in self.process_list:
-            if process.ub_name == name:
+            if process.name == name:
                 return True
+        return False
+
+    # if process is not alive or no longer in the queue
+    # we can assume that it's no longer running
+    def process_running(self, name):
+        for process in self.process_list:
+            if process.name == name:
+                return process.isAlive()
         return False
 
     # terminates all known child processes
@@ -104,7 +111,7 @@ class ProcessManager:
     def kill_all_workers(self):
         self.t_lock.acquire()
         for process in self.process_list:
-            if process.ub_category == "worker":
+            if process.category == "worker":
                 process.terminate()
         self.t_lock.release()
 
@@ -148,7 +155,7 @@ class ProcessManager:
             # recreates the process list only with system processes and
             # processes that haven't stopped yet
             self.process_list[:] = [process for process in self.process_list if
-                                    (process.ub_category == "system" or
+                                    (process.category == "system" or
                                      process.is_alive() is True)]
             self.t_lock.release()
             sleep(10)

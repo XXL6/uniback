@@ -5,7 +5,7 @@ from .forms import UpdateAccountForm, UnlockCredentialStoreForm, \
     EditCredentialsForm, DecryptCredentialStoreForm, EncryptCredentialStoreForm
 from uniback import bcrypt, db, process_manager
 from uniback.misc import credential_manager
-from uniback.models.system import CredentialGroup
+from uniback.models.general import CredentialGroup
 # from uniback.tools.credential_tools import credentials_locked, \
 #    get_all_credential_groups, get_group_credentials, remove_credentials, \
 #    set_crypt_key
@@ -155,7 +155,7 @@ def delete_groups():
     for group_id in group_id_list:
         credential_manager.remove_credentials(group_id)
         # logger.debug(group_id)
-    flash("Successfully removed items ayylmao", category="success")
+    flash("Successfully removed items", category="success")
     return json.dumps({'success': True}), 200, {'ContentType': 'application/json'}
 
 

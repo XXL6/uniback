@@ -1,0 +1,33 @@
+{# Forms and other types of data entry can reside in this page. This page will then be displayed
+    in the menu_content of each tab page #}
+{# unused for now #}
+{% macro generate_form_page(data) %}
+        <div class="form-container">
+    {% for thingy in form %}
+        {% if thingy.id != 'csrf_token' %}
+            {{ thingy.label(class="form-control-label") }}
+            {% if thingy.errors %}
+            {{ thingy(class="form-control is-invalid") }}
+            <div class="invalid-feedback">
+                {% for error in thingy.errors %}
+                    <span>{{ error }}</span>
+                {% endfor %}
+            </div>
+            {% else %}
+            {{ thingy(class="form-control") }}
+            {% endif %}
+        {% endif %}
+    {% endfor %}
+        </div>
+        <footer>
+
+        </footer>
+    {% else %}
+        <div class="entry-container">
+
+        </div>
+        <footer>
+
+        </footer>
+    {% endif %}
+{% endmacro %}

@@ -5,9 +5,9 @@ from multiprocessing import Process
 # some communication objects if necessary
 class UBProcess(Process):
 
+    name = "Generic UB Process"
     description = "Process without a set description."
-    ub_name = "Generic UB Process"
-    ub_category = "undefined"
+    category = "undefined"
     data = {}
 
     def assign_queue(self, queue):
@@ -18,3 +18,9 @@ class UBProcess(Process):
 
     def assign_data_manager(self, data_manager):
         self.data_manager = data_manager
+
+    def send_data(self, data_name, data):
+        self.queue.put(
+            {'process_id': self.pid,
+             'data_name': data_name,
+             'data': data})
