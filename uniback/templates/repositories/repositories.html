@@ -2,7 +2,8 @@
 {% set active_tab = "repositories" %}
 {% set menu_list = [
    (url_for('repositories.repository_list'), 'repository_list', 'Repository List'),
-   (url_for('repositories.physical_locations'), 'physical_locations', 'Physical Locations')
+   (url_for('repositories.physical_locations'), 'physical_locations', 'Physical Locations'),
+   (url_for('repositories.physical_location_types'), 'physical_location_types', 'Location Types')
 ] -%}
 {% from "menu_generator.html" import generate_menu, generate_sidebar %}
 {% block tab_content %}

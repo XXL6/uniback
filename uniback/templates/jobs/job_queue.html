@@ -1,4 +1,101 @@
 {% extends "jobs/jobs.html" %}
 {% set active_menu = "job_queue" %}
+{% from "menu_generator.html" import generate_action_menu, generate_sidebar %}
+{% from "list_generators.html" import item_select_script, item_update_script, item_select_script_refresh %}
+{% set action_menu_list = [
+    {'action_name': 'Delete', 'action': 'delete', 'icon': 'fas fa-trash', 'variant': '2'}
+]
+-%}
 {% block menu_content %}
+    {{ generate_action_menu(action_menu_list, '/jobs/job_queue/') }}
+    <span class="list-group-header">
+        <div class="list-content col-1">Check</div>
+        <div class="list-content col-1">Id</div>
+        <div class="list-content col-2">Name</div>
+        <div class="list-content col-2">Status</div>
+        <div class="list-content col-6">Progress</div>
+    </span>
+    <ul class="list-group">
+        {% for item in items %}
+            <li class="list-group-item" id="{{item['id']}}">
+                <div class="list-checkbox-div">
+                    {# autocomplete=off so that checkbox doesn't stay checked after refresh #}
+                    <input type="checkbox" class="list-checkbox" autocomplete="off" value="{{item['id']}}" id="{{item['id']}}-box">
+                </div>
+                <div class="list-content-group">
+                    <div class="inline-list-content col-1">
+                        {{item['id']}}
+                    </div>
+                    <div class="inline-list-content col-2">
+                        {{item['name']}}
+                    </div>
+                    <div class="inline-list-content col-2 list-update" id="status">
+                        {{item['status']}}
+                    </div>
+                    <div class="inline-list-content col-6">
+                        {#{item['progress']}#}
+                        <progress id="progress" class="custom-progress list-update" max="100" value="{{item['progress']}}"></progress>
+                    </div>
+                </div>
+            </li>
+        {% endfor %}
+    </ul>
+    {{ item_select_script('/jobs/job_queue/_get_queue_info') }}
+    {#{ item_update_script('/jobs/job_queue/_job_queue_update') }#}
+    {#<script type="text/javascript">
+        function updateJobStatus() {
+            job_ids = getVisibleItemIds();
+            var i;
+            if (job_ids.length > 0) {
+                for (i = 0; i < job_ids.length; i++) {
+                    $.get($SCRIPT_ROOT + "/jobs/job_queue/_get_job_status", {
+                                id: job_ids[i]
+                            }, function(data) {
+                                var data = JSON.parse(data);
+                                // alert(data['name'])
+                                if (data.data == "deleted") {
+                                    $( "#" + data.id + ".list-group-item" ).remove();
+                                } else {
+                                    $( "#" + data.id + ".list-group-item " + "#" + data.name + ".list-update"  ).html(data.data);
+                                }
+                            }
+                        );
+                }
+            }
+        }
+        // check the status of the jobs every 5 seconds
+        setInterval(updateJobStatus, 5000);
+    </script>#}
+    <script type="text/javascript">
+        function addNewItem(data) {
+            $( ".list-group" ).append(
+                `
+                <li class="list-group-item" id="{id}">
+                    <div class="list-checkbox-div" style="display: block">
+                        {# autocomplete=off so that checkbox doesn't stay checked after refresh #}
+                        <input type="checkbox" class="list-checkbox" autocomplete="off" value="{id}" id="{id}-box">
+                    </div>
+                    <div class="list-content-group">
+                        <div class="inline-list-content col-1">
+                            {id}
+                        </div>
+                        <div class="inline-list-content col-2">
+                            {name}
+                        </div>
+                        <div class="inline-list-content col-2 list-update" id="status">
+                            {status}
+                        </div>
+                        <div class="inline-list-content col-6">
+                            <progress id="progress" class="custom-progress list-update" max="100" value="{progress}"></progress>
+                        </div>
+                    </div>
+                </li>
+                `.formatUnicorn(data)
+            );
+            $( ".list-content-group" ).off();
+            $( ".list-checkbox" ).off();
+            {{ item_select_script_refresh() }}
+        }
+    </script>
+    {{ item_update_script('/jobs/job_queue/_update') }}
 {% endblock menu_content %}

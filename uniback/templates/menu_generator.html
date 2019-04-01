@@ -23,24 +23,45 @@
     $( document ).mousedown(function(e) {
         if (e.target === handler) {
             handlerDragging = true;
+            $( document ).bind('mousemove', mouseDrag);
             $( "body" ).css( "cursor", "ew-resize");
         }
     });
 
-    $( document ).mousemove(function(e) {
+    function disableSelect(event) {
+        event.preventDefault();
+    }
+
+    function mouseDrag(e) {
         if (!handlerDragging) {
-            return false;
+            return;
+            //super();
+        }
+        window.addEventListener('selectstart', disableSelect);
+        var containerOffsetLeft = wrapper.offsetLeft;
+        var pointerRelativeXpos = e.pageX - containerOffsetLeft;
+
+        $( ".menu-content" ).css("width", (pointerRelativeXpos) + "px");
+        $( ".menu-content" ).css("flexGrow", "0");
+    }
+
+    /*$( document ).mousemove(function(e) {
+        if (!handlerDragging) {
+            return;
+            //super();
         }
         var containerOffsetLeft = wrapper.offsetLeft;
         var pointerRelativeXpos = e.pageX - containerOffsetLeft;
 
         $( ".menu-content" ).css("width", (pointerRelativeXpos) + "px");
         $( ".menu-content" ).css("flexGrow", "0");
-    });
+    });*/
 
     $( document ).mouseup(function(e) {
         handlerDragging = false;
+        window.removeEventListener('selectstart', disableSelect);
         $( "body" ).css( "cursor", "default");
+        $ ( document ).unbind('mousemove.mouseDrag');
     });
 </script>
 {% endmacro %}
@@ -50,18 +71,29 @@
     items, editing items, and other such things #}
 {% macro generate_action_menu(action_item_list, action_script_root) %}
 <div class="action-menu">
-    {% for variant, item_list in action_item_list.items() %}
-    <ul class='variant-{{variant}} action-menu-item-list'>
-        {% for item in item_list %}
+    <ul class='action-menu-item-list action-menu-left'>
+        {% for item in action_item_list %}
+            <li class="action-menu-item variant-{{ item['variant'] }}" action="{{item['action']}}">
+                <button class="action-menu-button" onclick="handleAction('{{item['action']}}')"> {# this might look like an error, but it works #}
+                    {#<i class="action-menu-button-icon" src="{{item['icon']}}" alt="{{item['action_name']}}"></i>#}
+                    <i class="action-menu-button-icon {{item['icon']}}"></i>
+                    <span class="button-text">
+                        {{item['action_name']}}
+                    </span>
+                </button>
+            </li>
+        {% endfor %}
+    </ul>
+    <ul class='action-menu-item-list action-menu-right'>
+        {#% for item in item_list %}
                 <li class="action-menu-item" action="{{item['action']}}">
                     <button class="action-menu-item-button" onclick="handleAction('{{item['action']}}')"> {# this might look like an error, but it works #}
-                        <img class="action-menu-item-icon" src="{{item['icon']}}" alt="{{item['action_name']}}">
+                        {#<img class="action-menu-item-icon" src="{{item['icon']}}" alt="{{item['action_name']}}">
                         {{item['action_name']}}
                     </button>
                 </li>
-        {% endfor %}
+        {% endfor %#}
     </ul>
-    {% endfor %}
 </div>
 <script type="text/javascript">
     function handleAction(action_name) {
@@ -96,21 +128,59 @@
             case "add":
                 window.location.replace("{{ action_script_root + '_add' }}")
                 break;
+
+            case "run_jobs":
+                var itemsToRun = getCheckedItemIds();
+                $.ajax({
+                    type: "POST",
+                    url: $SCRIPT_ROOT + "{{action_script_root + '_run_jobs'|safe}}",
+                    contentType: "application/json",
+                    data: JSON.stringify({item_ids: itemsToRun}),
+                    dataType: "json",
+                    success: function(response) {
+                        location.reload();
+                        console.log(response);
+                    },
+                    error: function(error) {
+                        location.reload();
+                        console.log(error);
+                    }
+                });
+                break;
             default:
                 alert("Unsupported function");
         }
     }
     
-    // chooses which action menu variant to display
+    // chooses which action menu button variant to disable
     // variants are essentially based on how many list items are selected
-    // if no items selected, variant is 0
-    // if 1 item is selected, variant is 1
-    // if 2+ items are selected, variant is 2
-    // variant 3 is always visible
-    function displayActionMenuVariant(variant) {
+    // variant 0, visible all the time
+    // variant 1, visible when one or more items selected
+    // variant 2, visible when two or more items selected
+    /*function displayActionMenuVariant(variant) {
         $( ".action-menu-item-list" ).css("display", "none");
-        $( ".action-menu-item-list.variant-" + variant.toString()).css("display", "inline-block");
-        $( ".action-menu-item-list.variant-3" ).css("display", "inline-block");
+        $( ".action-menu-item-list.variant-" + variant.toString()).css("display", "inline");
+        $( ".action-menu-item-list.variant-3" ).css("display", "inline");
+    }*/
+    function displayActionMenuVariant(variant) {
+        $( ".action-menu-item button" ).prop("disabled", true);
+        switch (variant) {
+            case 0:     
+                $( ".action-menu-item.variant-0 button").removeAttr("disabled");
+                break;
+            case 1:
+                $( ".action-menu-item.variant-0 button").removeAttr("disabled");
+                $( ".action-menu-item.variant-1 button").removeAttr("disabled");
+                $( ".action-menu-item.variant-2 button").removeAttr("disabled");
+                break;
+            case 2:
+                $( ".action-menu-item.variant-0 button").removeAttr("disabled");
+                $( ".action-menu-item.variant-2 button").removeAttr("disabled");
+                break;
+            default:
+                break;
+        }
     }
+    displayActionMenuVariant(0);
 </script>
 {% endmacro %}

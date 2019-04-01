@@ -3,16 +3,15 @@
     padding: 0px 0px 0px 0px;
 }
 
-.app-header {
-    display: grid;
-    grid-template-columns: repeat(20, 1fr);
-    height: 60px;
-}
-
 .tab-content {
     display: grid;
     grid-template-columns: repeat(20, 1fr);
     height: calc(100vh - 60px);
+}
+
+.list-view {
+    overflow: auto;
+    height: calc(100% - 76px);
 }
 
 .list-group {
@@ -22,7 +21,6 @@
 
 .list-group-item {
     /*background-color: #898376;*/
-    border-radius: 0px; /* bit of rounding so it looks similar to the rounding of the list-group */
     line-height: 1.2em;
     padding-top: 0%;
     padding-bottom: 0%;
@@ -43,6 +41,10 @@
     padding-top: 0%;
     padding-bottom: 0%;
     display: grid;
+    position: sticky;
+    top: 50px;
+    height: 18px;
+    overflow: hidden;
     grid-template-columns: repeat(16, 1fr);
 }
 
@@ -90,7 +92,9 @@
 }
 */
 .inline-list-content {
-    position: relative;    
+    position: relative; 
+    overflow: hidden;   
+    margin-right: 10px;
 }
 
 .list-checkbox-div {
@@ -131,7 +135,7 @@
 
 /* not actually part of the left-hand menu but is all the content to the right of the menu and to the left of the sidebar*/
 .menu-content {
-    overflow: auto;
+    overflow: hidden;
     height: 100%;
     padding-left: 0%;
     padding-right: 0%;

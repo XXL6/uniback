@@ -2,25 +2,67 @@
 {% set active_menu = "repository_list" %}
 {% block menu_content %}
     {% if not form %}
-        <div class="engine">
-            <form id="engine-select-form" method="POST">
-                <select name="engine-select">
+        <div class="property_select_form ub-form">
+            <form id="engine-select-form" class="form-style-1" method="POST">
+                <select class="form-control" name="engine-select">
                     {% for engine, engine_name in available_engines %}
                         <option value="{{ engine }}">{{ engine_name }}</option>
                     {% endfor %}
                 </select>
-                <input type="submit" value="Next" /> 
+                <input class="form-control" type="submit" value="Next" /> 
             </form>            
         </div>
     {% else %}
-        <form class="ub-form" method="POST" action="" enctype="multipart/form-data"><!-- enctype required for images or something -->
+        <form id="repository-form" class="ub-form form-style-1" method="POST" action="" enctype="multipart/form-data"><!-- enctype required for images or something -->
             {{ form.hidden_tag() }}
             <fieldset class="form-group">
-                <legend class="border-bottom">Repository Attributes</legend>
+                <legend class="border-bottom">General Repository Attributes</legend>
+                <div class="form-group">
+                    {{ form.location.label(class="form-control-label") }}
+                    {% if form.location.errors %}
+                    {{ form.location(class="form-control is-invalid") }}
+                    <div class="invalid-feedback">
+                        {% for error in form.location.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    {{ form.location(class="form-control") }}
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    {{ form.ub_name.label(class="form-control-label") }}
+                    {% if form.ub_name.errors %}
+                    {{ form.ub_name(class="form-control is-invalid") }}
+                    <div class="invalid-feedback">
+                        {% for error in form.ub_name.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    {{ form.ub_name(class="form-control") }}
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    {{ form.ub_description.label(class="form-control-label") }}
+                    {% if form.ub_description.errors %}
+                    {{ form.ub_description(class="form-control is-invalid") }}
+                    <div class="invalid-feedback">
+                        {% for error in form.ub_description.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    {{ form.ub_description(class="form-control") }}
+                    {% endif %}
+                </div>
+            </fieldset>
+            <fieldset class="form-group">
+                <legend class="border-bottom">Engine Specific Repository Attributes</legend>
                 {% for item in form %}
                     {# we do not want to put the submit field in the for loop as it might
                         appear out of order instead of the bottom. #}
-                    {% if item.id != 'csrf_token' and item.id != 'submit'%}
+                    {% if item.id != 'csrf_token' and item.id != 'submit' and item.id != 'ub_description' and item.id != 'ub_name' and item.id != 'location' %}
                         <div class="form-group">
                             {{ item.label(class="form-control-label") }}
                             {% if item.errors %}
@@ -36,11 +78,10 @@
                         </div>
                     {% endif %}
                 {% endfor %}
-                <div class="form-group">
-                    {{ form.submit.label(class="form-control-label") }}
-                    {{ form.submit(class="form-control") }}
-                </div>
             </fieldset>
+            <div class="form-group">
+                {{ form.submit(class="form-control") }}
+            </div>
         </form>
     {% endif %}
 {% endblock menu_content %}

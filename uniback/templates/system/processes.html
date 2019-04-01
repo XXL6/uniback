@@ -1,0 +1,12 @@
+{% extends "system/system.html" %}
+{% set active_menu = "processes" %}
+{% from "list_generators.html" import generate_process_list %}
+{% from "menu_generator.html" import generate_action_menu, generate_sidebar %}
+{% set action_menu_list = [
+    {'action_name': 'Terminate', 'action': 'terminate', 'icon': 'fas fa-stop-circle', 'variant': '2'}
+]
+-%}
+{% block menu_content %}
+    {{ generate_action_menu(action_menu_list, '/system/processes/') }}
+    {{ generate_process_list(processes) }}
+{% endblock menu_content %}

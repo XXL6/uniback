@@ -16,7 +16,7 @@ class ProgressTracker:
     # multi_input is set to false in that case, then the progress
     # bar would quickly fill up and then reset for every file
     # copied which is not what we want.
-    def __init__(self, multi_input):
+    def __init__(self, multi_input=False):
         self.multi_input = multi_input
 
     def get_current_progress(self):
@@ -25,11 +25,16 @@ class ProgressTracker:
     def set_regex(self, regex):
         self.regex = regex
 
+    def get_regex(self):
+        return self.regex
+
     def set_progress(self, input_string):
         # if multi_input is false, we can assume that the value
         # the process outputs is the completion state of the whole job
         if not self.multi_input:
-            self.current_progress = self.parse_progress(input_string)
+            temp_progress = self.parse_progress(input_string)
+            if temp_progress is not None:
+                self.current_progress = temp_progress
         else:
             # let's just deal with single input progresses for now
             pass
@@ -44,6 +49,7 @@ class ProgressTracker:
         # that might show up in the application
         progress_value = None
         try:
+            # input_string = input_string.decode('utf-8')
             parsed_string = re.search(self.regex, input_string)
         except AttributeError:
             raise ("Attempt to set the progress was made, but regex "
@@ -53,7 +59,7 @@ class ProgressTracker:
                 progress_value = float(parsed_string.group())
             except ValueError:
                 return None
-            return progress_value
+        return progress_value
 
     def reset_progress(self):
         self.current_progress = 0.0
@@ -86,10 +92,13 @@ class DataTracker:
     # the return dictionary will have the name of the data stored
     # as the key and the data stored itself as the value
     def get_data_values(self):
-        return_dict = {}
-        for data in self.data_set:
-            return_dict[data['name']] = data['data']
-        return return_dict
+        if len(self.data_set) > 0:
+            return_dict = {}
+            for data in self.data_set:
+                return_dict[data['name']] = data['data']
+            return return_dict
+        else:
+            return None
 
     # values can be set manually if custom tracker is used
     # the regex in that case would be None and ignored when

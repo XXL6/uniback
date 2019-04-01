@@ -19,9 +19,13 @@
     <link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='sidebar.css') }}">
     <link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='preloader/style.css') }}">
     <link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='action_menu.css') }}">
-    <link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='color_scheme.css') }}">
+    <link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='color_scheme_v1.css') }}">
+    <link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='form_style_1.css') }}">
+    <link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='fontawesome/css/all.min.css') }}">
+    <link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='sidebar_tables.css') }}">
 </head>
-<script src="{{ url_for('static', filename='jquery.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='jquery.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='global.js') }}"></script>
 <!--<script src="{{ url_for('static', filename='bootstrap.js') }}"></script>-->
 <script type="text/javascript">
     $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};

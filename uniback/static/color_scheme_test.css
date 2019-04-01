@@ -101,3 +101,20 @@ body {
     we do this so we have a border that we can have the cursor change to the resize cursor*/
 }
 /*---------------------------------------------*/
+
+/* colors relating to the info snackbar */
+#snackbar.danger {
+    background-color: #dc3545;
+    color: #fff;
+}
+
+#snackbar.info {
+    background-color: #17a2b8;
+    color: #fff;
+}
+
+#snackbar.success {
+    background-color: #28a745;
+    color: #fff;
+}
+/*------------------------------------------------*/

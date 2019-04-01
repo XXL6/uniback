@@ -1,6 +1,0 @@
-{% extends "settings/settings.html" %}
-{% set active_menu = "processes" %}
-{% from "list_generators.html" import generate_process_list %}
-{% block menu_content %}
-{{ generate_process_list(processes) }}
-{% endblock menu_content %}

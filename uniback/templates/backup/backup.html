@@ -12,7 +12,8 @@
         <div class="flex-col menu-content">
             {% block menu_content %}
             {% endblock menu_content %}
-            {{ render_flashed_messages() }}
+            {#{ render_flashed_messages() }#}
+            {{ render_flashed_messages_snack() }}
         </div>
         {{ generate_sidebar() }}
     </div>

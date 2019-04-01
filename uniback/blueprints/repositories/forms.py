@@ -1,24 +1,16 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, IntegerField, SubmitField, ValidationError, \
-    SelectField
+    SelectField, TextAreaField
 from uniback.tools.local_session import LocalSession
 from uniback.models.general import PhysicalLocation
 from uniback.db_interfaces.physical_location import get_physical_locations
-import copy
+from wtforms.validators import DataRequired
 
 
 class EditLocationForm(FlaskForm):
     name = StringField('Name')
     address = StringField('Address')
-    type = StringField('Type')
-    concurrent_jobs = IntegerField('Concurrent Jobs')
-    submit = SubmitField('Submit')
-
-
-class AddLocationForm(FlaskForm):
-    name = StringField('Name')
-    address = StringField('Address')
-    type = StringField('Type')
+    type = SelectField('Type', coerce=int)
     concurrent_jobs = IntegerField('Concurrent Jobs')
     submit = SubmitField('Submit')
 
@@ -29,8 +21,50 @@ class AddLocationForm(FlaskForm):
                 raise ValidationError(f"Location with name {name.data} already exists. Please pick a different name.")
 
 
+class AddLocationForm(FlaskForm):
+    name = StringField('Name')
+    address = StringField('Address')
+    type = SelectField('Type', coerce=int)
+    concurrent_jobs = IntegerField('Concurrent Jobs')
+    submit = SubmitField('Submit')
+
+    def validate_name(self, name):
+        with LocalSession() as session:
+            location = session.query(PhysicalLocation).filter_by(name=name.data).first()
+            if location:
+                raise ValidationError(f"Location with name {name.data} already exists. Please pick a different name.")
+
+
+class AddLocationTypeForm(FlaskForm):
+    name = StringField('Name')
+    subtype = StringField('SubType')
+    description = TextAreaField('Description')
+    submit = SubmitField('Submit')
+
+    def validate_name(self, name):
+        with LocalSession() as session:
+            location = session.query(PhysicalLocation).filter_by(name=name.data).first()
+            if location:
+                raise ValidationError(f"Location with name {name.data} already exists. Please pick a different name.")
+
+
+class EditLocationTypeForm(FlaskForm):
+    name = StringField('Name')
+    subtype = StringField('SubType')
+    description = TextAreaField('Description')
+    submit = SubmitField('Submit')
+    
+    def validate_name(self, name):
+        with LocalSession() as session:
+            location = session.query(PhysicalLocation).filter_by(name=name.data).first()
+            if location:
+                raise ValidationError(f"Location with name {name.data} already exists. Please pick a different name.")
+
+
 class AddRepositoryForm(FlaskForm):
     location = SelectField("Location", coerce=int)
+    ub_name = StringField("Internal Name")
+    ub_description = TextAreaField("Internal Description")
     submit = SubmitField("Submit")
 
 
@@ -43,9 +77,24 @@ def get_add_repository_form(field_list):
     # the parent class
     for field in field_list:
         if (field['type'] == 'string'):
-            setattr(F, field['name'], StringField(field['label']))
+            if (field['required']):
+                setattr(F, field['name'], StringField(field['label'], [DataRequired()]))
+            else:
+                setattr(F, field['name'], StringField(field['label']))
         elif (field['type'] == 'int'):
-            setattr(F, field['name'], IntegerField(field['label']))
+            if (field['required']):
+                setattr(F, field['name'], IntegerField(field['label'], [DataRequired()]))
+            else:
+                setattr(F, field['name'], IntegerField(field['label']))
         elif (field['type'] == 'select'):
-            setattr(F, field['name'], SelectField(field['label'], choices=field['values']))
+            if (field['required']):
+                setattr(F, field['name'], SelectField(field['label'], choices=field['values'], validators=[DataRequired()]))
+            else:
+                setattr(F, field['name'], SelectField(field['label'], choices=field['values']))
+        elif (field['type'] == 'text'):
+            if (field['required']):
+                setattr(F, field['name'], TextAreaField(field['label'], [DataRequired()]))
+            else:
+                setattr(F, field['name'], TextAreaField(field['label']))
+
     return F()

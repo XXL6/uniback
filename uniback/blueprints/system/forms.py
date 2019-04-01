@@ -26,7 +26,7 @@ class UnlockCredentialStoreForm(FlaskForm):
 
 class EncryptCredentialStoreForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired()])
-    confirm_password = PasswordField('Confirm Password')
+    confirm_password = PasswordField('Confirm Password', validators=[EqualTo('password')])
     submit = SubmitField('Submit')
 
 

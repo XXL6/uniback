@@ -15,3 +15,7 @@ def get_list_of_engines():
 def get_engine_class(engine, engine_class):
     return_class = getattr(importlib.import_module('uniback.plugins.engines.' + engine), engine_class)
     return return_class
+
+
+def get_engine_classes(engine):
+    return get_engine_class(engine, 'AVAILABLE_JOBS')

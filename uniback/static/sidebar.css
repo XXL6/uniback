@@ -5,6 +5,8 @@
     padding-right: 0%;
     box-sizing: border-box;
     min-width: 300px;
+    overflow: auto;
+    white-space: nowrap;
     flex: 1 999 auto;
 }
 

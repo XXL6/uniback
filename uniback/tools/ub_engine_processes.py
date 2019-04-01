@@ -6,8 +6,8 @@ class UBBackup(UBProcess):
 
     def __init__(self):
         super().__init__()
-        self.progress_tracker = ProgressTracker()
-        self.data_tracker = DataTracker()
+        # self.progress_tracker = ProgressTracker()
+        # self.data_tracker = DataTracker()
     
     def parse_backup_set(self):
         pass

@@ -21,7 +21,7 @@ def login():
             login_user(user, remember=form.remember_me.data)
             return redirect(url_for('main.home'))
         else:
-            flash('Wrong username or password', 'danger')
+            flash('Wrong username or password', category='danger')
     return render_template('login.html', form=form)
 
 

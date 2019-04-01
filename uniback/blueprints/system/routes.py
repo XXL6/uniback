@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, flash, redirect, \
-    url_for, request
+    url_for, request, Response
 from flask_login import login_required, current_user
 from .forms import UpdateAccountForm, UnlockCredentialStoreForm, \
     EditCredentialsForm, DecryptCredentialStoreForm, EncryptCredentialStoreForm
@@ -12,13 +12,14 @@ from uniback.models.general import CredentialGroup
 import logging
 import json
 import traceback
+from time import sleep
 
-settings = Blueprint('settings', '__name__')
+system = Blueprint('system', '__name__')
 logger = logging.getLogger('debugLogger')
 
 
-@settings.route(f'/{settings.name}', methods=['GET', 'POST'])
-@settings.route(f'/{settings.name}/account', methods=['GET', 'POST'])
+@system.route(f'/{system.name}', methods=['GET', 'POST'])
+@system.route(f'/{system.name}/account', methods=['GET', 'POST'])
 @login_required
 def account():
     form = UpdateAccountForm()
@@ -29,30 +30,30 @@ def account():
                 form.password.data).decode('utf-8')
             current_user.password = hashed_password
         db.session.commit()
-        flash("Account information has been updated", 'success')
-        return redirect(url_for('settings.account'))
+        flash("Account information has been updated", category='success')
+        return redirect(url_for('system.account'))
     elif request.method == 'GET':
         form.username.data = current_user.username
-    return render_template('settings/account.html', form=form)
+    return render_template('system/account.html', form=form)
 
 
-@settings.route(f'/{settings.name}/system')
-def system():
-    return render_template('settings/system.html')
+@system.route(f'/{system.name}/system')
+def settings():
+    return render_template('system/settings.html')
 
 
-@settings.route(f'/{settings.name}/plugins')
+@system.route(f'/{system.name}/plugins')
 def plugins():
-    return render_template('settings/plugins.html')
+    return render_template('system/plugins.html')
 
 
-@settings.route(f'/{settings.name}/processes')
+@system.route(f'/{system.name}/processes')
 def processes():
     process_list = process_manager.get_process_list()
-    return render_template('settings/processes.html', processes=process_list)
+    return render_template('system/processes.html', processes=process_list)
 
 
-@settings.route(f'/{settings.name}/processes/_get_process_info')
+@system.route(f'/{system.name}/processes/_get_process_info')
 def get_process_info():
     info_dict = {}
     process_id = request.args.get('id', 0, type=int)
@@ -60,76 +61,96 @@ def get_process_info():
     return render_template('sidebar/processes.html', info_dict=info_dict)
 
 
-@settings.route(f'/{settings.name}/credentials', methods=['GET', 'POST'])
+@system.route(f'/{system.name}/processes/_get_process_status')
+def get_process_status():
+    process_id = request.args.get('id', 0, type=int)
+    status = process_manager.get_info(process_id, 'status')
+    if status:
+        return json.dumps({'name': 'status', 'id': process_id, 'data': status})
+    else:
+        return json.dumps({'name': 'status', 'id': process_id, 'data': 'deleted'})
+
+
+@system.route(f'/{system.name}/processes/_update_processes')
+def update_processes():
+    def update_stream():
+        while True:
+            process_list = process_manager.get_process_list()
+            yield f'data: {json.dumps(process_list)}\n\n'
+            sleep(10)
+    return Response(update_stream(), mimetype="text/event-stream")
+
+
+@system.route(f'/{system.name}/credentials', methods=['GET', 'POST'])
 def credentials():
     locked = credential_manager.credentials_locked()
     encrypted = credential_manager.credentials_encrypted()
     credential_groups = credential_manager.get_all_credential_groups()
     return render_template(
-        'settings/credentials.html',
+        'system/credentials.html',
         credential_database_locked=locked,
         credential_database_encrypted=encrypted,
         credential_groups=credential_groups)
 
 
-@settings.route(f'/{settings.name}/credentials/_encrypt_credentials', methods=['GET', 'POST'])
+@system.route(f'/{system.name}/credentials/_encrypt_credentials', methods=['GET', 'POST'])
 def encrypt_credentials():
     form = EncryptCredentialStoreForm()
     if form.validate_on_submit():
         try:
             credential_manager.encrypt_credentials(form.password.data)
         except Exception:
-            flash("Failed to encrypt credentials")
+            flash("Failed to encrypt credentials", category='danger')
             logger.error(traceback.format_exc())
-        return redirect(url_for('settings.credentials'))
+        return redirect(url_for('system.credentials'))
     return render_template(
-        'settings/credentials_encrypt.html',
+        'system/credentials_encrypt.html',
         form=form
     )
 
 
-@settings.route(f'/{settings.name}/credentials/_decrypt_credentials', methods=['GET', 'POST'])
+@system.route(f'/{system.name}/credentials/_decrypt_credentials', methods=['GET', 'POST'])
 def decrypt_credentials():
     form = DecryptCredentialStoreForm()
     if form.validate_on_submit():
         try:
             credential_manager.decrypt_credentials()
         except Exception as e:
-            flash("Failed to decrypt credentials")
+            flash("Failed to decrypt credentials", category='danger')
             logger.error(e)
-        return redirect(url_for('settings.credentials'))
+        return redirect(url_for('system.credentials'))
     return render_template(
-        'settings/credentials_decrypt.html',
+        'system/credentials_decrypt.html',
         form=form
     )
 
 
-@settings.route(f'/{settings.name}/credentials/_unlock_credentials', methods=['GET', 'POST'])
+@system.route(f'/{system.name}/credentials/_unlock_credentials', methods=['GET', 'POST'])
 def unlock_credentials():
     form = UnlockCredentialStoreForm()
     if form.validate_on_submit():
         try:
             credential_manager.unlock_credentials(form.password.data)
         except Exception:
-            flash("Failed to unlock credentials")
+            flash("Failed to unlock credentials", category='danger')
             logger.error(traceback.format_exc())
-        return redirect(url_for('settings.credentials'))
+        return redirect(url_for('system.credentials'))
     return render_template(
-        'settings/credentials_unlock.html',
+        'system/credentials_unlock.html',
         form=form
     )
 
 
-@settings.route(f'/{settings.name}/credentials/_lock_credentials', methods=['GET', 'POST'])
+@system.route(f'/{system.name}/credentials/_lock_credentials', methods=['GET', 'POST'])
 def lock_credentials():
     try:
         credential_manager.lock_credentials()
     except Exception:
         logger.error(traceback.format_exc())
-        flash("Failed to lock credentials")
-    return redirect(url_for('settings.credentials'))
+        flash("Failed to lock credentials", category='danger')
+    return redirect(url_for('system.credentials'))
 
-@settings.route(f'/{settings.name}/credentials/_get_item_info')
+@system.route(f'/{system.name}/credentials/_get_item_info')
 def get_item_info():
     info_dict = {}
     group_id = request.args.get('id', 0, type=int)
@@ -149,7 +170,7 @@ def get_item_info():
     return render_template("sidebar/credentials.html", info_dict=info_dict)
 
 
-@settings.route(f'/{settings.name}/credentials/_delete', methods=['POST'])
+@system.route(f'/{system.name}/credentials/_delete', methods=['POST'])
 def delete_groups():
     group_id_list = request.get_json().get('item_ids')
     for group_id in group_id_list:
@@ -159,7 +180,7 @@ def delete_groups():
     return json.dumps({'success': True}), 200, {'ContentType': 'application/json'}
 
 
-@settings.route(f'/{settings.name}/credentials/_edit/<int:group_id>', methods=['GET', 'POST'])
+@system.route(f'/{system.name}/credentials/_edit/<int:group_id>', methods=['GET', 'POST'])
 def edit_group(group_id):
     credentials = credential_manager.get_group_credentials(group_id)
     credential_list = []
@@ -181,8 +202,8 @@ def edit_group(group_id):
         for credential_form in form.group_credentials:
             credential_manager.set_credential(group_id, credential_form.credential_role.data,
                                               credential_form.credential.data)
-        flash("Credentials have been updated", 'success')
-        return redirect(url_for('settings.credentials'))
+        flash("Credentials have been updated", category='success')
+        return redirect(url_for('system.credentials'))
     elif request.method == 'GET':
         form.group_description.data = credential_manager.get_group_description(group_id)
         for credential_form in form.group_credentials:
@@ -190,4 +211,4 @@ def edit_group(group_id):
             credential_form.credential.data = credential_manager.get_credential(group_id, credential_form.credential_role.data)
             # logger.debug("DATA" + str(credential_form.credential.data))
         
-    return render_template("settings/credentials_edit.html", form=form)
+    return render_template("system/credentials_edit.html", form=form)

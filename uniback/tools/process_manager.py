@@ -19,7 +19,7 @@ class ProcessManager:
     queue = Queue()
     p_lock = P_lock()
     t_lock = T_lock()
-    process_list = []
+    _process_list = []
 
     def __init__(self):
         self.logger = logging.getLogger("debugLogger")
@@ -32,7 +32,7 @@ class ProcessManager:
     def add_process(self, input_process):
         self.logger.debug(f"Starting process {input_process.name}")
         self.t_lock.acquire()
-        self.process_list.append(input_process)
+        self._process_list.append(input_process)
         self.t_lock.release()
         try:
             input_process.assign_queue(self.queue)
@@ -53,46 +53,72 @@ class ProcessManager:
     def get_process_list(self):
         return_list = []
         self.t_lock.acquire()
-        for process in self.process_list:
+        for process in self._process_list:
             return_list.append({
                 'name': process.name,
                 'category': process.category,
                 'status': "running" if process.is_alive()
                 else "stopped",
-                'pid': process.pid
+                'id': process.pid
             })
         self.t_lock.release()
         return return_list
 
     def get_process_object(self, pid):
+        return_object = None
         self.t_lock.acquire()
-        for process in self.process_list:
+        for process in self._process_list:
             if process.pid == pid:
                 return_object = process
                 break
         self.t_lock.release()
         return return_object
 
-    def get_description(self, pid):
+    def get_process_object_name(self, name):
+        return_object = None
         self.t_lock.acquire()
-        for process in self.process_list:
-            if process.pid == pid:
-                return_val = process.description
+        for process in self._process_list:
+            if process.name == name:
+                return_object = process
                 break
         self.t_lock.release()
+        return return_object
+
+    def get_description(self, pid):
+        return_val = self.get_process_object(pid)
+        if return_val:
+            return_val = return_val.description
         return return_val
+
+    def get_info(self, pid, data_name):
+        info = None
+        temp = self.get_process_object(pid)
+        if temp:
+            info = getattr(temp, data_name)
+        return info
+
+    def get_status(self, pid):
+        status = None
+        process = self.get_process_object(pid)
+        if process:
+            status = ("running" if process.is_alive()
+                      else "stopped")
+        return status
 
     # is there a process with a certain name?
     def process_exists(self, name):
-        for process in self.process_list:
+        self.t_lock.acquire()
+        for process in self._process_list:
             if process.name == name:
+                self.t_lock.release()
                 return True
+        self.t_lock.release()
         return False
 
     # if process is not alive or no longer in the queue
     # we can assume that it's no longer running
     def process_running(self, name):
-        for process in self.process_list:
+        for process in self._process_list:
             if process.name == name:
                 return process.isAlive()
         return False
@@ -100,7 +126,7 @@ class ProcessManager:
     # terminates all known child processes
     def kill_all_processes(self):
         self.t_lock.acquire()
-        for process in self.process_list:
+        for process in self._process_list:
             process.terminate()
         self.t_lock.release()
 
@@ -110,7 +136,7 @@ class ProcessManager:
     # now be running as threads instead
     def kill_all_workers(self):
         self.t_lock.acquire()
-        for process in self.process_list:
+        for process in self._process_list:
             if process.category == "worker":
                 process.terminate()
         self.t_lock.release()
@@ -154,7 +180,7 @@ class ProcessManager:
             self.t_lock.acquire()
             # recreates the process list only with system processes and
             # processes that haven't stopped yet
-            self.process_list[:] = [process for process in self.process_list if
+            self._process_list[:] = [process for process in self._process_list if
                                     (process.category == "system" or
                                      process.is_alive() is True)]
             self.t_lock.release()
@@ -183,6 +209,11 @@ class ProcessManager:
             self.t_lock.acquire()
             # we update the locally known process class instance with the
             # data that we get from the actual process of the said instance
-            process.data[temp_dict['data_name']] = temp_dict['data']
+            if temp_dict['data_name'] == 'log':
+                process.job_log.append(temp_dict['data'])
+            else:
+                process.data[temp_dict['data_name']] = temp_dict['data']
+            if temp_dict['data_name'] == 'progress':
+                print('progress' + str(temp_dict['data']))
             self.t_lock.release()
             sleep(0.01)
