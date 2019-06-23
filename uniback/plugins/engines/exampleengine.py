@@ -1,3 +1,5 @@
+AVAILABLE_JOBS = ["DummyJob4", "DummyJob5", "DummyJob6"]
+
 class Repository:
 
     def __init__(self):

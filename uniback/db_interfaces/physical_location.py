@@ -45,6 +45,7 @@ def get_location_info(id):
         location = session.query(PhysicalLocation).filter_by(id=id).first()
         if location:
             info_dict = dict(
+                id=location.id,
                 name=location.name,
                 address=location.address,
                 type=location.type,
@@ -52,6 +53,7 @@ def get_location_info(id):
             )
         else:
             info_dict = dict(
+                id=-1,
                 name="UNDEFINED",
                 address="UNDEFINED",
                 type="UNDEFINED",

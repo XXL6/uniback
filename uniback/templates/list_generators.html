@@ -1,21 +1,3 @@
-{% macro generate_list(items) %}
-    <ul class="list-group">
-        {% for subitems in items %}
-            <li class="list-group-item mt-1">
-                {% for item in subitems %}
-                    {% if item["display-type"] == "break" %}
-                        <p></p>
-                    {% elif item["display-type"] == "info" %}
-                        <div class="col-md-{{item['width']}} {{item['element-class']}} list-content">
-                            {{item['display-data']}}
-                        </div>
-                    {% endif %}
-                {% endfor %}
-            </li>
-        {% endfor %}
-    </ul>
-{% endmacro %}
-
 {% macro generate_credential_list(groups) %}
     <ul class="list-group">
         {% for group in groups %}
@@ -43,72 +25,6 @@
     {{ item_select_script('/system/credentials/_get_item_info') }}
 {% endmacro %}
 
-{% macro item_select_script_refresh() %}
-    $( ".list-checkbox-div" ).css("display", "block");
-    $( ".list-content-group" ).click(function() {
-        var groupId = $(this).parent().attr("id");
-        // get the value of the clicked item's checkbox so we can check it
-        // when deciding whether to deselect it
-        var itemChecked = $( "#" + groupId + "-box" ).prop( "checked" )
-        deselectAllItems();
-        if (itemChecked)
-        {
-            $( "#" + groupId + "-box" ).prop( "checked", false );
-        } else {
-            $( "#" + groupId + "-box" ).prop( "checked", true );
-        }
-        $( "#" + groupId + "-box" ).change();
-    });
-
-    $( ".list-checkbox" ).change(function() {
-        var checkedItems = getCheckedItemIds();
-        if ($(this).prop( "checked" ) == true) {
-            if (checkedItems.length == 1) {
-                startLoader();
-                getItemInfo($(this).val());
-            } else {
-                emptySidebar();
-            }
-            // if checkbox checked, we highlight the item itself
-            $( ".list-group-item[id='" + $( this ).val() + "']" ).addClass( 'active' );
-        }
-        else  {
-            // if a single item remains selected, we want to populate its info in the sidebar
-            if (checkedItems.length == 1) {
-                startLoader();
-                getItemInfo(checkedItems[0]);
-            } else {
-                // if final item gets unchecked, we clean the sidebar
-                emptySidebar();
-            }
-            $( ".list-group-item[id='" + $( this ).val() + "']" ).removeClass( 'active' );
-        }
-
-        if (typeof displayActionMenuVariant === "function") {
-            switch (checkedItems.length) {
-                case 0: 
-                    displayActionMenuVariant(0);
-                    break;
-                case 1:
-                    displayActionMenuVariant(1);
-                    break;
-                default:
-                    displayActionMenuVariant(2);
-                    break;
-            }
-        }
-    });
-
-    /*  
-        hovers and mousedowns done in JS as I need the parent to get the property when hovering over one of the child elements
-        doesn't seem to be possible in pure CSS
-    */
-    $( ".list-content-group" ).hover(function() {
-        $( this ).parent().addClass( 'hover' );
-    }, function() {
-        $( this ).parent().removeClass( 'hover' );
-    });
-{% endmacro %}
 
 {% macro item_select_script(info_script_location) %}
 <script>
@@ -237,175 +153,6 @@
 </script>
 {% endmacro %}
 
-{% macro generate_saved_jobs_list(jobs) %}
-    <ul class="list-group">
-        {% for job in jobs %}
-            <li class="list-group-item mt-1" id="{{group['job_id']}}">
-                <div>
-                    Name: {{job['name']}}
-                    Notes: {{job['notes']}}
-                </div>
-            </li>
-        {% endfor %}
-    </ul>
-{% endmacro %}
-
-{% macro generate_process_list(processes) %}
-    <span class="list-group-header">
-        <div class="list-content col-1">Check</div>
-        <div class="list-content col-2">Name</div>
-        <div class="list-content col-2">Category</div>
-        <div class="list-content col-2">Status</div>
-        <div class="list-content col-2">Process Id</div>
-    </span>
-    <ul class="list-group">
-        {% for process in processes %}
-            <li class="list-group-item" id="{{process['id']}}">
-                <div class="list-checkbox-div">
-                    {# autocomplete=off so that checkbox doesn't stay checked after refresh #}
-                    <input type="checkbox" class="list-checkbox" autocomplete="off" value="{{process['id']}}" id="{{process['id']}}-box">
-                </div>
-                <div class="list-content-group">
-                    <div class="inline-list-content col-2">
-                        {{process['name']}}
-                    </div>
-                    <div class="inline-list-content col-2">
-                        {{process['category']}}
-                    </div>
-                    <div class="inline-list-content col-2 list-update" id="status">
-                        {{process['status']}}
-                    </div>
-                    <div class="inline-list-content col-2">
-                        {{process['id']}}
-                    </div>
-                </div>
-            </li>
-        {% endfor %}
-    </ul>
-    {{ item_select_script('/system/processes/_get_process_info') }}
-    <script type="text/javascript">
-        function addNewItem(data) {
-            $( ".list-group" ).append(
-                `
-                <li class="list-group-item" id="{id}">
-                    <div class="list-checkbox-div" style="display: block">
-                        {# autocomplete=off so that checkbox doesn't stay checked after refresh #}
-                        <input type="checkbox" class="list-checkbox" autocomplete="off" value="{id}" id="{id}-box">
-                    </div>
-                    <div class="list-content-group">
-                        <div class="inline-list-content col-2">
-                            {name}
-                        </div>
-                        <div class="inline-list-content col-2">
-                            {category}
-                        </div>
-                        <div class="inline-list-content col-2 list-update" id="status">
-                            {status}
-                        </div>
-                        <div class="inline-list-content col-2">
-                            {id}
-                        </div>
-                    </div>
-                </li>
-                `.formatUnicorn(data)
-            );
-            $( ".list-content-group" ).off();
-            $( ".list-checkbox" ).off();
-            {{ item_select_script_refresh () }}
-        }
-    </script>
-    {{ item_update_script('/system/processes/_update_processes') }}
-{% endmacro %}
-
-{% macro generate_physical_location_list(locations) %}
-    <span class="list-group-header">
-        <div class="list-content col-1">Check</div>
-        <div class="list-content col-1">Id</div>
-        <div class="list-content col-2">Name</div>
-        <div class="list-content col-5">Address</div>
-        <div class="list-content col-2">Type</div>
-        <div class="list-content col-2">Status</div>
-    </span>
-    <ul class="list-group">
-        {% for location in locations.items %}
-            <li class="list-group-item" id="{{location['id']}}">
-                <div class="list-checkbox-div">
-                    {# autocomplete=off so that checkbox doesn't stay checked after refresh #}
-                    <input type="checkbox" class="list-checkbox" autocomplete="off" value="{{location['id']}}" id="{{location['id']}}-box">
-                </div>
-                <div class="list-content-group">
-                    <div class="inline-list-content col-1">
-                        {{location.id}}
-                    </div>
-                    <div class="inline-list-content col-2">
-                        {{location.name}}
-                    </div>
-                    <div class="inline-list-content col-5">
-                        {{location.address}}
-                    </div>
-                    <div class="inline-list-content col-2">
-                        {{location.physical_location_type.name}}
-                    </div>
-                    <div class="inline-list-content list-update col-2" id="status">
-                        {#{location.get('status')}#}
-                        <div class='lds-dual-ring-small'></div>
-                    </div>
-                </div>
-            </li>
-        {% endfor %}
-    </ul>
-    {{ item_select_script('/repositories/physical_locations/_get_location_info') }}
-    {#{{ item_update_script('/repositories/physical_locations/_update') }}#}
-    <script type="text/javascript">
-        function updateLocationStatus() {
-            location_ids = getVisibleItemIds();
-            var i;
-            for (i = 0; i < location_ids.length; i++) {
-                $.get($SCRIPT_ROOT + "/repositories/physical_locations/_get_location_status", {
-                            id: location_ids[i]
-                        }, function(data) {
-                            var data = JSON.parse(data);
-                            // alert(data['name'])
-                            $( "#" + data.id + ".list-group-item " + "#" + data.name + ".list-update"  ).html(data.data);
-                        }
-                    );
-            }
-        }
-        updateLocationStatus();
-    </script>
-{% endmacro %}
-
-{% macro generate_repository_list(repositories) %}
-    <span class="list-group-header">
-        <div class="list-content col-1">Check</div>
-        <div class="list-content col-1">Id</div>
-        <div class="list-content col-2">Name</div>
-        <div class="list-content col-2">Engine</div>
-    </span>
-    <ul class="list-group">
-        {% for repository in repositories %}
-            <li class="list-group-item" id="{{repository['id']}}">
-                <div class="list-checkbox-div">
-                    {# autocomplete=off so that checkbox doesn't stay checked after refresh #}
-                    <input type="checkbox" class="list-checkbox" autocomplete="off" value="{{repository['id']}}" id="{{repository['id']}}-box">
-                </div>
-                <div class="list-content-group">
-                    <div class="inline-list-content col-1">
-                        {{repository['id']}}
-                    </div>
-                    <div class="inline-list-content col-2">
-                        {{repository['name']}}
-                    </div>
-                    <div class="inline-list-content col-5">
-                        {{repository['engine']}}
-                    </div>
-                </div>
-            </li>
-        {% endfor %}
-    </ul>
-    {{ item_select_script('/repositories/repository_list/_get_repository_info') }}
-{% endmacro %}
-
 {# updates items from a list based on their class name and id #}
 {% macro item_update_script(script_location) %}
     <script type="text/javascript">
@@ -429,23 +176,24 @@
                 //console.log('index: ' + tempList.indexOf(visibleIds[i]));
                 for (i = 0; i < visibleIds.length; i++) {
                     if (tempList.indexOf(visibleIds[i]) < 0) {
-                        removeListGroupItem(visibleIds[i]);
+                        //removeListGroupItem(visibleIds[i]);
+                        removeItem(visibleIds[i]);
                     }
                 }
                 for (i = 0; i < data.length; i++) {
                     // the following if statement checks if the item that we have gotten from the server
                     // matches one of the items that are already on the screen so we can proceed with updating them
                     if (visibleIds.indexOf(data[i]['id']) >= 0) {
-                        toUpdate = $( "#" + data[i]['id'] + ".list-group-item " + ".list-update"  );
+                        toUpdate = $( "#" + data[i]['id'] + ".item-update" );
                         var j;
                         for (j = 0; j < toUpdate.length; j++) {
                             //toUpdate.attr('id').html(data[i][toUp]);
-                            if (toUpdate[j].getAttribute('id') == "progress") {
+                            if (toUpdate[j].classList.contains("item-update-value")) {
                                 toUpdate[j].value = data[i][toUpdate[j].getAttribute('id')];
-                            } else {
+                            } else if (toUpdate[j].classList.contains("item-update-html")) {
                                 toUpdate[j].innerHTML = data[i][toUpdate[j].getAttribute('id')];
                             }
-                            console.log("ID: " + toUpdate[j].getAttribute('id') + "   DATA: " + data[i][toUpdate[j].getAttribute('id')]);
+                            //console.log("ID: " + toUpdate[j].getAttribute('id') + "   DATA: " + data[i][toUpdate[j].getAttribute('id')]);
                         }
                     } else {
                         // if the item we got is not yet in the displayed list, we add it
@@ -454,6 +202,124 @@
                 }
                 //$( "#" + data.id + ".list-group-item " + "#" + data.name + ".list-update"  ).html(data.data);
             };
+        }
+    </script>
+{% endmacro %}
+
+{% macro item_select_script_table(info_script_location) %}
+    <script>
+        $( ".table-checkbox-div" ).css("display", "block");
+        // when any table cell that is not a checkbox cell gets
+        // clicked, we want to check its corresponding checkbox and
+        // deselect other items.
+        $(document).on('click', '.table-data-item', function() {
+            var groupId = $(this).parent().attr("id");
+            // get the value of the clicked item's checkbox so we can check it
+            // when deciding whether to deselect it
+            //var itemChecked = $( "#" + groupId + "-box" ).prop( "checked" );
+            deselectAllItems();
+            // following code can be uncommented so that item cannot be reselected
+            // that will cause an item to not be selected if it's clicked and other
+            // items are selected at the same time
+            /*if (itemChecked)
+            {
+                $( "#" + groupId + "-box" ).prop( "checked", false );
+            } else {
+                $( "#" + groupId + "-box" ).prop( "checked", true );
+            }*/
+            $( "#" + groupId + "-box" ).prop( "checked", true );
+            $( "#" + groupId + "-box" ).change();
+        });
+
+        $(document).on('mouseover', '.table-data-item', function() {
+            $( this ).parent().addClass( 'hover' );
+        });
+
+        $(document).on('mouseout', '.table-data-item', function() {
+            $( this ).parent().removeClass( 'hover' );
+        });
+
+        $(document).on('change', '.table-checkbox', function() {
+            var checkedItems = getCheckedItemIds();
+            if ($(this).prop( "checked" ) == true) {
+                if (checkedItems.length == 1) {
+                    startLoader();
+                    getItemInfo($(this).val());
+                } else {
+                    emptySidebar();
+                }
+                // if checkbox checked, we highlight the item itself
+                $( ".ub-table-data-row[id='" + $( this ).val() + "']" ).addClass( 'active' );
+            }
+            else  {
+                // if a single item remains selected, we want to populate its info in the sidebar
+                if (checkedItems.length == 1) {
+                    startLoader();
+                    getItemInfo(checkedItems[0]);
+                } else {
+                    // if final item gets unchecked, we clean the sidebar
+                    emptySidebar();
+                }
+                $( ".ub-table-data-row[id='" + $( this ).val() + "']" ).removeClass( 'active' );
+            }
+
+            if (typeof displayActionMenuVariant === "function") {
+                switch (checkedItems.length) {
+                    case 0: 
+                        displayActionMenuVariant(0);
+                        break;
+                    case 1:
+                        displayActionMenuVariant(1);
+                        break;
+                    default:
+                        displayActionMenuVariant(2);
+                        break;
+                }
+            }
+        }); 
+
+        function deselectAllItems() {
+            $( "input:checkbox" ).prop( "checked", false );
+            $( ".ub-table-data-row" ).removeClass( 'active' );
+            //$( ".table-checkbox" ).change();
+        };
+
+        function getItemInfo(item_id) {
+            $.get($SCRIPT_ROOT + "{{info_script_location|safe}}", {
+                        id: item_id
+                    }, function(data) {
+                        populateSidebar(data);
+                    }
+                );
+        }
+
+        function getCheckedItemIds() {
+            var itemList = $( ".table-checkbox:checked" ).get();
+            var idList = [];
+            for (var i = 0; i < itemList.length; i++) {
+                idList.push(itemList[i].value);
+            }
+            return idList;
+        }
+
+        function emptySidebar() {
+            $( ".sidebar-content" ).empty();
+        }
+
+        // clears the sidebar before adding any new information
+        function populateSidebar(data) {
+            $( ".sidebar-content" ).empty();
+            $( ".sidebar-content" ).append( data );
+        }
+
+        function appendToSidebar(data) {
+            $( ".sidebar-content" ).append( data );
+        }
+
+        // spinny thing when item is checked while AJAX retrieves the info
+        function startLoader() {
+            $( ".sidebar-content" ).empty();
+            $( ".sidebar-content" ).append( "<div class='lds-dual-ring'></div>")
         }
     </script>
 {% endmacro %}

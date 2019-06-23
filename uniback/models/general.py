@@ -1,5 +1,6 @@
 from datetime import datetime
 from uniback import db
+from sqlalchemy.types import JSON as JSONType
 
 
 class SysVars(db.Model):
@@ -43,11 +44,27 @@ class SavedJobs(db.Model):
     notes = db.Column(db.Text)
     engine_name = db.Column(db.String(50), nullable=False)
     engine_class = db.Column(db.String(50), nullable=False)
-    params = db.Column(db.String)
+    
+    last_attempted_run = db.Column(db.DateTime)
+    last_successful_run = db.Column(db.DateTime)
     time_added = db.Column(
         db.DateTime,
         nullable=False,
         default=datetime.utcnow)
+    
+    db.relationship('JobHistory', backref='saved_job', lazy=True)
+    db.relationship('JobParameter', backref='saved_job', lazy=True)
+
+
+class JobParameter(db.Model):
+    __bind_key__ = 'general'
+    __tablename__ = 'job_parameter'
+    id = db.Column(db.Integer, primary_key=True, nullable=False)
+    param_name = db.Column(db.String(50), nullable=False)
+    param_display_name = db.Column(db.String(50))
+    param_value = db.Column(db.Text)
+
+    job_id = db.Column(db.Integer, db.ForeignKey('saved_jobs.id'), nullable=False)
 
 
 # the job queue will no longer be a database table and will instead
@@ -86,6 +103,7 @@ class JobHistory(db.Model):
         nullable=False,
         default=datetime.utcnow)
 
+    saved_job_id = db.Column(db.Integer, db.ForeignKey('saved_jobs.id'), nullable=True)
     engine = db.Column(db.Integer, db.ForeignKey('engine.id'), nullable=False)
 
 
@@ -158,7 +176,45 @@ class BackupSet(db.Model):
     name = db.Column(db.String(50), nullable=False, unique=True)
     type = db.Column(db.Integer, nullable=False)
     data = db.Column(db.Text)
+    source = db.Column(db.String, nullable=True)
+    last_good_backup = db.Column(db.DateTime)
+
     time_added = db.Column(
         db.DateTime,
         nullable=False,
-        default=datetime.utcnow)
+        default=datetime.utcnow
+    )
+    backup_objects = db.relationship(
+        'BackupObject',
+        backref='backup_set',
+        lazy=True
+    )
+
+
+class BackupObject(db.Model):
+    __bind_key__ = 'general'
+    __tablename__ = 'backup_object'
+    id = db.Column(db.Integer, primary_key=True, nullable=False)
+    data = db.Column(db.Text)
+    last_good_backup = db.Column(db.DateTime)
+    time_added = db.Column(
+        db.DateTime,
+        nullable=False,
+        default=datetime.utcnow
+    )
+
+    backup_set_id = db.Column(db.Integer, db.ForeignKey('backup_set.id'))
+    snapshots = db.relationship(
+        'Snapshot',
+        backref='backup_object',
+        lazy=True)
+
+class Snapshot(db.Model):
+    __bind_key__ = 'general'
+    __tablename__ = 'snapshot' 
+    id = db.Column(db.Integer, primary_key=True, nullable=False)
+    data = db.Column(db.String)
+    snapshot_time = db.Column(db.DateTime)
+    snapshot_id = db.Column(db.String)
+
+    backup_object_id = db.Column(db.Integer, db.ForeignKey('backup_object.id'))

@@ -1,7 +1,7 @@
 {% extends "jobs/jobs.html" %}
 {% set active_menu = "saved_jobs" %}
 {% from "menu_generator.html" import generate_action_menu %}
-{% from "list_generators.html" import item_select_script %}
+{% from "list_generators.html" import item_select_script_table %}
 {% set action_menu_list = [
     {'action_name': 'Add', 'action': 'add', 'icon': 'fas fa-plus-square', 'variant': '0'},
     {'action_name': 'Edit', 'action': 'edit', 'icon': 'fas fa-edit', 'variant': '1'},
@@ -11,34 +11,23 @@
 -%}
 {% block menu_content %}
     {{ generate_action_menu(action_menu_list, '/jobs/saved_jobs/') }}
-    <span class="list-group-header">
-        <div class="inline-list-content col-1">Check</div>
-        <div class="inline-list-content col-1">Id</div>
-        <div class="inline-list-content col-2">Name</div>
-        <div class="inline-list-content col-3">Last Successful Run</div>
-    </span>
-    <div class="list-view">
-        <ul class="list-group">
-            {% for item in items.items %}
-                <li class="list-group-item" id="{{item['id']}}">
-                    <div class="list-checkbox-div">
-                        {# autocomplete=off so that checkbox doesn't stay checked after refresh #}
-                        <input type="checkbox" class="list-checkbox" autocomplete="off" value="{{item['id']}}" id="{{item['id']}}-box">
-                    </div>
-                    <div class="list-content-group">
-                        <div class="inline-list-content col-1">
-                            {{item['id']}}
-                        </div>
-                        <div class="inline-list-content col-1">
-                            {{item['name']}}
-                        </div>
-                        <div class="inline-list-content col-2">
-                            {{item['last_run']}}
-                        </div>
-                    </div>
-                </li>
-            {% endfor %}
-        </ul>
-    </div>
-    {{ item_select_script('/jobs/saved_jobs/_get_saved_job_info') }}
+    <table class="ub-table">
+        <tr class="ub-table-header-row">
+            <th class="ub-table-header table-col-05">Check</th>
+            <th class="ub-table-header table-col-05">Id</th>
+            <th class="ub-table-header table-col-3">Name</th>
+            <th class="ub-table-header table-col-6">Last Successful Run</th>
+        </tr>
+        {% for item in items.items %}
+            <tr class="ub-table-data-row" id="{{ item['id'] }}">
+                <td class="ub-table-data table-col-05 table-checkbox-div">
+                    <input type="checkbox" class="table-checkbox list-checkbox" autocomplete="off" value="{{item['id']}}" id="{{item['id']}}-box">
+                </td>
+                <td class="ub-table-data table-data-item table-col-05">{{ item['id'] }}</td>
+                <td class="ub-table-data table-data-item table-col-3">{{ item['name'] }}</td>
+                <td class="ub-table-data table-data-item table-col-6">{{ item['last_run'] }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+    {{ item_select_script_table('/jobs/saved_jobs/_get_saved_job_info') }}
 {% endblock menu_content %}

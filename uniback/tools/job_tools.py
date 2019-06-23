@@ -104,3 +104,7 @@ class JobObject:
         # all new jobs will begin life as queued and will
         # change as they are run
         self.status = JobStatus.JOB_STATUS_QUEUED
+
+        self.success_callback = None
+        self.warning_callback = None
+        self.error_callback = None

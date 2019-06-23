@@ -18,6 +18,7 @@ flask-wtf = "*"
 pycryptodome = "*"
 pywin32 = "*"
 sqlalchemy = "*"
+psutil = "*"
 
 [requires]
 python_version = "3.7"

@@ -26,6 +26,29 @@ body {
 }
 /*---------------------------------------------*/
 
+/* colors related to the default rendered table */
+/*.ub-table-data-row {
+    background-color: #89837638;
+}*/
+
+.ub-table-data-row.active, .ub-table-data-row.active.hover {
+    background-color: #B8B2A2;
+    color: #17181E;
+}
+
+.ub-table-data-row.hover {
+    background-color: rgba(184, 178, 162, 0.281);
+    color: #eeeeee;
+}
+
+.list-checkbox-div {
+    /*background-color: #33353C; /* same as the body's background color if need to appear transparent */
+    /*border-color: #33353C;*/
+    background-color: transparent;
+    border-color: transparent;
+}
+/*---------------------------------------------*/
+
 /* colors related to the left side menu */
 .menu-container {
     background-color: #17181E;

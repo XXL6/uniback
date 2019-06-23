@@ -60,6 +60,10 @@
     grid-column: span 3;
 }
 
+.col-4 {
+    grid-column: span 4;
+}
+
 .col-5 {
     grid-column: span 5;
 }
@@ -155,5 +159,5 @@
 .ub-form {
     /*display: grid;
     grid-template-columns: repeat(8, 1fr);*/
-    max-width: 500px;
+    /*max-width: 500px;*/
 }

@@ -100,7 +100,8 @@ class CredentialManager():
         session.commit()
         session.close()
 
-    # returns a list of credential objects belonging to a certain group
+    # returns a dictionary of credentials belonging to a certain group
+    # format: {credential_role: credential_data}
     def get_group_credentials(self, group_id):
         if self.credentials_encrypted() and self.credentials_locked():
             self.logger.error(f"Could not get credentials for group="
@@ -110,7 +111,7 @@ class CredentialManager():
         session = self.get_local_session()
         credentials = session.query(CredentialStore).filter_by(
             group_id=group_id)
-        return_credentials = []
+        return_credentials = {}
         if self.credentials_encrypted():
             decryption_key = self.get_crypt_key()
             if decryption_key is None:
@@ -118,11 +119,11 @@ class CredentialManager():
                                   "unlocked but no key provided")
                 raise Exception("No password specified for credential store")
             for credential in credentials:
-                return_credentials.append({'credential_role': credential.credential_role, 'credential_data': crypt_tools.decrypt_string(
-                    credential.credential_data, decryption_key)})
+                return_credentials[credential.credential_role] = crypt_tools.decrypt_string(
+                    credential.credential_data, decryption_key)
         else:
             for credential in credentials:
-                return_credentials.append({'credential_role': credential.credential_role, 'credential_data': credential.credential_data})
+                return_credentials[credential.credential_role] = credential.credential_data
         session.close()
         return return_credentials
 
@@ -463,6 +464,13 @@ class CredentialManager():
         session.add(new_credential)
         session.commit()
         session.close()
+        return group_id
+
+    # credential_dict format: {credential_role: credential_data}
+    def add_credentials_from_dict(self, service_name, credential_dict):
+        group_id = -1
+        for key, value in credential_dict.items():
+            group_id = self.add_credential(service_name, key, value)
         return group_id
 
     # Removes all credentials belonging to a certain group including

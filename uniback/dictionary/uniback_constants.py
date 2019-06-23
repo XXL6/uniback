@@ -29,16 +29,13 @@ class JobStatusFinishedMap:
 
 
 class BackupSetTypes:
-    BS_TYPE_FOLDERS = 0
-    BS_TYPE_FOLDERS_DESC = "Folders"
-    BS_TYPE_FILESFOLDERS = 1
+    BS_TYPE_FILESFOLDERS = 0
     BS_TYPE_FILESFOLDERS_DESC = "Files and Folders"
 
 
 # might put these in the database later
 class BackupSetList:
     BACKUP_SETS = {
-        BackupSetTypes.BS_TYPE_FOLDERS: BackupSetTypes.BS_TYPE_FOLDERS_DESC,
         BackupSetTypes.BS_TYPE_FILESFOLDERS: BackupSetTypes.BS_TYPE_FILESFOLDERS_DESC
     }
 

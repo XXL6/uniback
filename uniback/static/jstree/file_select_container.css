@@ -1,0 +1,11 @@
+.ub-file-select {
+    background: white;
+    /*max-width: 400px;*/
+    height: 300px;
+    color: black;
+    margin-top: 10px !important;
+    overflow: auto;
+    padding: 0px 0px 0px 0px !important;
+    /*border: 2px 2px 2px 2px;
+    border-style: solid;*/
+}

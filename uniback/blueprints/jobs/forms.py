@@ -5,9 +5,8 @@ from wtforms.validators import DataRequired
 
 
 class AddJobForm(FlaskForm):
-    name = StringField('Name')
-    engine_name = SelectField('Engine Name')
-    engine_class = SelectField('Engine Class', choices=[('ayy', 'lmao')])
+    ub_name = StringField('Job Name', validators=[DataRequired()])
+    ub_description = TextAreaField('Description')
     submit = SubmitField('Submit')
 
 

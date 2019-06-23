@@ -1,7 +1,7 @@
 {% extends "repositories/repositories.html" %}
 {% set active_menu = "repository_list" %}
 {% from "menu_generator.html" import generate_action_menu, generate_sidebar %}
-{% from "list_generators.html" import item_select_script %}
+{% from "list_generators.html" import item_select_script_table %}
 {% set action_menu_list = [
     {'action_name': 'Add', 'action': 'add', 'icon': 'fas fa-plus-square', 'variant': '0'},
     {'action_name': 'Edit', 'action': 'edit', 'icon': 'fas fa-edit', 'variant': '1'},
@@ -10,32 +10,24 @@
 -%}
 {% block menu_content %}
     {{ generate_action_menu(action_menu_list, '/repositories/repository_list/') }}
-    <span class="list-group-header">
-        <div class="list-content col-1">Check</div>
-        <div class="list-content col-1">Id</div>
-        <div class="list-content col-2">Name</div>
-        <div class="list-content col-2">Engine</div>
-    </span>
-    <ul class="list-group">
+    <table class="ub-table" id="repository-table">
+        <tr class="ub-table-header-row">
+            <th class="ub-table-header table-col-05">Check</th>
+            <th class="ub-table-header table-col-05">Id</th>
+            <th class="ub-table-header table-col-2">Name</th>
+            <th class="ub-table-header table-col-7">Engine</th>
+        </tr>
         {% for repository in repositories.items %}
-            <li class="list-group-item" id="{{repository['id']}}">
-                <div class="list-checkbox-div">
-                    {# autocomplete=off so that checkbox doesn't stay checked after refresh #}
-                    <input type="checkbox" class="list-checkbox" autocomplete="off" value="{{repository['id']}}" id="{{repository['id']}}-box">
-                </div>
-                <div class="list-content-group">
-                    <div class="inline-list-content col-1">
-                        {{repository['id']}}
-                    </div>
-                    <div class="inline-list-content col-2">
-                        {{repository['name']}}
-                    </div>
-                    <div class="inline-list-content col-5">
-                        {{repository['engine']}}
-                    </div>
-                </div>
-            </li>
+            <tr class="ub-table-data-row" id="{{ repository['id'] }}">
+                <td class="ub-table-data table-col-05 table-checkbox-div">
+                    <input type="checkbox" class="table-checkbox list-checkbox" autocomplete="off" value="{{repository['id']}}" id="{{repository['id']}}-box">
+                </td>
+                <td class="ub-table-data table-data-item">{{ repository['id'] }}</td>
+                <td class="ub-table-data table-data-item">{{ repository['name'] }}</td>
+                <td class="ub-table-data table-data-item">{{ repository['engine'] }}</td>
+            </tr>
         {% endfor %}
-    </ul>
-    {{ item_select_script('/repositories/repository_list/_get_repository_info') }}
+    </table>
+    {{ item_select_script_table('/repositories/repository_list/_get_repository_info') }}
+
 {% endblock menu_content %}

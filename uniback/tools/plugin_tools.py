@@ -18,4 +18,6 @@ def get_engine_class(engine, engine_class):
 
 
 def get_engine_classes(engine):
-    return get_engine_class(engine, 'AVAILABLE_JOBS')
+    classes = get_engine_class(engine, 'AVAILABLE_JOBS')
+    classes = [(item, item) for item in classes]
+    return classes

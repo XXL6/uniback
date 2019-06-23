@@ -1,3 +1,5 @@
+import subprocess
+import traceback
 from multiprocessing import Process
 from uniback.tools.data_trackers import ProgressTracker, DataTracker
 from time import sleep
@@ -35,6 +37,28 @@ class UBProcess(Process):
         except Exception as e:
             self.log(f"update_thread exception: {e}")
         pass
+
+    def start_subprocess(self, command):
+        try:
+            self.task = subprocess.Popen(
+                command,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT)
+            # stdout, stderr = self.task.communicate()
+        except Exception as e:
+            self.log(f'Exception 1: {e}')
+            self.log(f'Traceback: {traceback.format_exc()}')
+            self.status('error')
+            return
+        try:
+            while self.task.poll() is None:
+                self.parse_input(self.task.stdout)
+                # self.log(self.progress_tracker.get_current_progress())
+        except Exception as e:
+            self.log(f'Exception 2: {e}')
+            self.log(f'Traceback: {traceback.format_exc()}')
+            self.status('error')
+            return
 
     def parse_input(self, input):
         temp = os.read(input.fileno(), 128).decode('utf-8')

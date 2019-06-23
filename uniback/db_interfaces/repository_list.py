@@ -22,6 +22,22 @@ def add_repository(info):
         session.commit()
 
 
+def delete_repositories(ids):
+    with LocalSession() as session:
+        for id in ids:
+            session.query(Repository).filter_by(id=id).delete()
+        session.commit()
+
+
+def get_engine_repositories(engine_name):
+    repository_list = []
+    with LocalSession() as session:
+        repositories = session.query(Repository).filter_by(engine=engine_name)
+        for repository in repositories:
+            repository_list.append((repository.id, repository.name))
+    return repository_list
+
+
 def get_info(id):
     info_dict = {}
     with LocalSession() as session:

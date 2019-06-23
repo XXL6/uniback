@@ -1,46 +1,39 @@
 {% extends "jobs/jobs.html" %}
 {% set active_menu = "job_queue" %}
 {% from "menu_generator.html" import generate_action_menu, generate_sidebar %}
-{% from "list_generators.html" import item_select_script, item_update_script, item_select_script_refresh %}
+{% from "list_generators.html" import item_select_script_table, item_update_script, item_select_script_refresh %}
 {% set action_menu_list = [
     {'action_name': 'Delete', 'action': 'delete', 'icon': 'fas fa-trash', 'variant': '2'}
 ]
 -%}
 {% block menu_content %}
     {{ generate_action_menu(action_menu_list, '/jobs/job_queue/') }}
-    <span class="list-group-header">
-        <div class="list-content col-1">Check</div>
-        <div class="list-content col-1">Id</div>
-        <div class="list-content col-2">Name</div>
-        <div class="list-content col-2">Status</div>
-        <div class="list-content col-6">Progress</div>
-    </span>
-    <ul class="list-group">
-        {% for item in items %}
-            <li class="list-group-item" id="{{item['id']}}">
-                <div class="list-checkbox-div">
-                    {# autocomplete=off so that checkbox doesn't stay checked after refresh #}
-                    <input type="checkbox" class="list-checkbox" autocomplete="off" value="{{item['id']}}" id="{{item['id']}}-box">
-                </div>
-                <div class="list-content-group">
-                    <div class="inline-list-content col-1">
-                        {{item['id']}}
-                    </div>
-                    <div class="inline-list-content col-2">
-                        {{item['name']}}
-                    </div>
-                    <div class="inline-list-content col-2 list-update" id="status">
-                        {{item['status']}}
-                    </div>
-                    <div class="inline-list-content col-6">
-                        {#{item['progress']}#}
-                        <progress id="progress" class="custom-progress list-update" max="100" value="{{item['progress']}}"></progress>
-                    </div>
-                </div>
-            </li>
+    
+    {{ item_select_script_table('/jobs/job_queue/_get_queue_info') }}
+
+    <table class="ub-table" id="job-queue-table">
+        <tr class="ub-table-header-row">
+            <th class="ub-table-header table-col-05">Check</th>
+            <th class="ub-table-header table-col-05">Id</th>
+            <th class="ub-table-header table-col-2">Name</th>
+            <th class="ub-table-header table-col-2">Status</th>
+            <th class="ub-table-header table-col-5">Progress</th>
+        </tr>
+        {% for item in items.items %}
+            <tr class="ub-table-data-row" id="{{ item['id'] }}">
+                <td class="ub-table-data table-col-05 table-checkbox-div">
+                    <input type="checkbox" class="table-checkbox list-checkbox" autocomplete="off" value="{{item['id']}}" id="{{item['id']}}-box">
+                </td>
+                <td class="ub-table-data table-data-item">{{ item['id'] }}</td>
+                <td class="ub-table-data table-data-item">{{ item['name'] }}</td>
+                <td class="ub-table-data table-data-item item-update item-update-html">{{ item['status'] }}</td>
+                <td class="ub-table-data table-data-item">
+                        <progress id="progress" class="custom-progress item-update item-update-value" max="100" value="{{item['progress']}}"></progress>
+                </td>
+            </tr>
         {% endfor %}
-    </ul>
-    {{ item_select_script('/jobs/job_queue/_get_queue_info') }}
+    </table>
+
     {#{ item_update_script('/jobs/job_queue/_job_queue_update') }#}
     {#<script type="text/javascript">
         function updateJobStatus() {
@@ -68,33 +61,40 @@
     </script>#}
     <script type="text/javascript">
         function addNewItem(data) {
-            $( ".list-group" ).append(
-                `
-                <li class="list-group-item" id="{id}">
-                    <div class="list-checkbox-div" style="display: block">
-                        {# autocomplete=off so that checkbox doesn't stay checked after refresh #}
-                        <input type="checkbox" class="list-checkbox" autocomplete="off" value="{id}" id="{id}-box">
-                    </div>
-                    <div class="list-content-group">
-                        <div class="inline-list-content col-1">
-                            {id}
-                        </div>
-                        <div class="inline-list-content col-2">
-                            {name}
-                        </div>
-                        <div class="inline-list-content col-2 list-update" id="status">
-                            {status}
-                        </div>
-                        <div class="inline-list-content col-6">
-                            <progress id="progress" class="custom-progress list-update" max="100" value="{progress}"></progress>
-                        </div>
-                    </div>
-                </li>
-                `.formatUnicorn(data)
-            );
-            $( ".list-content-group" ).off();
-            $( ".list-checkbox" ).off();
-            {{ item_select_script_refresh() }}
+            var table = document.getElementById("job-queue-table");
+            var row = table.insertRow(-1);
+            var cell1 = row.insertCell(0);
+            var cell2 = row.insertCell(1);
+            var cell3 = row.insertCell(2);
+            var cell4 = row.insertCell(3);
+            var cell5 = row.insertCell(4);
+            
+            cell1.innerHTML = '<input type="checkbox" class="table-checkbox list-checkbox" autocomplete="off" value="' + data['id'] + '" id="' + data['id'] + '-box">';
+            cell2.innerHTML = data['id'];
+            cell3.innerHTML = data['name'];
+            cell4.innerHTML = data['status'];
+            cell5.innerHTML = '<progress id="progress" class="custom-progress item-update item-update-value" max="100" value="' + data['progress'] + '"></progress>';
+            row.classList.add("ub-table-data-row");
+            row.id = data['id'];
+            cell1.classList.add("ub-table-data");
+            cell2.classList.add("ub-table-data");
+            cell3.classList.add("ub-table-data");
+            cell4.classList.add("ub-table-data");
+            cell5.classList.add("ub-table-data");
+            cell2.classList.add("table-data-item");
+            cell3.classList.add("table-data-item");
+            cell4.classList.add("table-data-item");
+            cell4.classList.add("item-update");
+            cell4.classList.add("item-update-html");
+            cell5.classList.add("table-data-item");
+        }
+
+        function removeItem(id) {
+            var table = document.getElementById("job-queue-table");
+            row = document.getElementById(id);
+            if (row && row.rowIndex) {
+                table.deleteRow(row.rowIndex);
+            }
         }
     </script>
     {{ item_update_script('/jobs/job_queue/_update') }}

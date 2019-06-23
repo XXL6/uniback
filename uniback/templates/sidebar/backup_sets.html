@@ -19,3 +19,8 @@ Data:<br> {{ info_dict["data"] }}<br>#}
         {% endfor %}
     </tbody>
 </table>
+<ul id="backup-set-contents">
+    {% for item in set_items %}
+        <li>{{ item }}</li>
+    {% endfor %}
+</ul>

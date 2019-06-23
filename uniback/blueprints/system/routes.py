@@ -50,7 +50,7 @@ def plugins():
 @system.route(f'/{system.name}/processes')
 def processes():
     process_list = process_manager.get_process_list()
-    return render_template('system/processes.html', processes=process_list)
+    return render_template('system/processes.html', items=process_list)
 
 
 @system.route(f'/{system.name}/processes/_get_process_info')
@@ -77,7 +77,7 @@ def update_processes():
         while True:
             process_list = process_manager.get_process_list()
             yield f'data: {json.dumps(process_list)}\n\n'
-            sleep(10)
+            sleep(5)
     return Response(update_stream(), mimetype="text/event-stream")
 
 
@@ -161,9 +161,9 @@ def get_item_info():
     info_dict["service_name"] = group.service_name
     info_dict["time_added"] = group.time_added
     info_dict["credentials"] = []
-    for cred in credential_list:
+    for key, value in credential_list.items():
         info_dict["credentials"].append(
-            dict(role=cred['credential_role'], data=cred['credential_data']))
+            dict(role=key, data=value))
 
     # return jsonify(info=info_dict)
     # return json.dumps(info_dict)
@@ -184,8 +184,8 @@ def delete_groups():
 def edit_group(group_id):
     credentials = credential_manager.get_group_credentials(group_id)
     credential_list = []
-    for credential in credentials:
-        credential_list.append({'credential_role': credential['credential_role']})
+    for key, value in credentials.items():
+        credential_list.append({'credential_role': key})
     # credential_list = [{'credential': 't4estthingy'}]
     form = EditCredentialsForm(group_credentials=credential_list)
     for credential_form in form.group_credentials:

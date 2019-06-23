@@ -45,6 +45,8 @@ class JobRunner(Thread):
                             time_started=job.time_started,
                             time_finished=datetime.now()
                         )
+                        if job.success_callback is not None:
+                            job.success_callback(job)
                         job.status = JobStatus.JOB_STATUS_FINISHED
                     elif job.process.data.get('status') == 'error':
                         self.add_to_history(
@@ -57,9 +59,39 @@ class JobRunner(Thread):
                             time_started=job.time_started,
                             time_finished=datetime.now()
                         )
+                        if job.error_callback is not None:
+                            job.error_callback()
+                        job.status = JobStatus.JOB_STATUS_FINISHED
+                    elif job.process.data.get('status') == 'warning':
+                        self.add_to_history(
+                            name=job.name,
+                            engine=job.engine,
+                            status=JobStatusFinished.JOB_STATUS_WARNING,
+                            type=type(job.process).__name__,
+                            # log='\n'.join(job.process.log),
+                            log=json.dumps(job.process.job_log),
+                            time_started=job.time_started,
+                            time_finished=datetime.now()
+                        )
+                        if job.warning_callback is not None:
+                            job.warning_callback()
+                        job.status = JobStatus.JOB_STATUS_FINISHED
+                    elif not job.process.is_alive() and (job.process.data.get('status') == 'running' or job.process.data.get('status') is None):
+                        job.process.job_log.append("Job's process exited with no status.")
+                        self.add_to_history(
+                            name=job.name,
+                            engine=job.engine,
+                            status=JobStatusFinished.JOB_STATUS_WARNING,
+                            type=type(job.process).__name__,
+                            # log='\n'.join(job.process.log),
+                            log=json.dumps(job.process.job_log),
+                            time_started=job.time_started,
+                            time_finished=datetime.now()
+                        )
                         job.status = JobStatus.JOB_STATUS_FINISHED
                 elif job.status == JobStatus.JOB_STATUS_FINISHED:
-                    self.post_run_routine(self.queue.pop())
+                    # self.post_run_routine(self.queue.pop())
+                    self.queue.pop()
             sleep(1)
 
     def add_to_history(self, **kwargs):
@@ -79,6 +111,8 @@ class JobRunner(Thread):
             session.add(history)
             session.commit()
 
+    # when a job gets reported as finished, it gets passed into this
+    # method where any further processing may take place if needed
     def post_run_routine(self, job):
         if type(job.process).__name__ == 'Repository':
             data_dict = {}

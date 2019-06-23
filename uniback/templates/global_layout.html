@@ -23,9 +23,18 @@
     <link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='form_style_1.css') }}">
     <link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='fontawesome/css/all.min.css') }}">
     <link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='sidebar_tables.css') }}">
+    <link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='table_stylesheet.css') }}">
+    <link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='noty/lib/noty.css') }}" />
+    <link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='noty/lib/themes/relax.css') }}" />
+    {# jstree stuff #}
+    <link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='jstree/themes/custom/style.css') }}">
+    <link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='jstree/file_select_container.css') }}">
 </head>
-<script type="text/javascript" src="{{ url_for('static', filename='jquery.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='jquery.min.js') }}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='global.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='jstree/jstree.min.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='noty/lib/noty.min.js') }}"></script>
+
 <!--<script src="{{ url_for('static', filename='bootstrap.js') }}"></script>-->
 <script type="text/javascript">
     $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};

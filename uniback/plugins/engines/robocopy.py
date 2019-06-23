@@ -7,7 +7,7 @@ from time import sleep
 
 OS_SUPPORT = ["Windows"]
 RESUMABLE = False
-
+AVAILABLE_JOBS = ["DummyJob1", "DummyJob2", "DummyJob3"]
 
 class Backup(UBBackup):
 

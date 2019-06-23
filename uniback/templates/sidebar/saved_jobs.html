@@ -1,3 +1,16 @@
-Name: {{ info_dict["name"] }}<br>
-Engine Name: {{ info_dict["engine_name"] }}<br>
-Engine Class: {{ info_dict["engine_class"] }}<br>
+<table class="sidebar-info-table">
+    <thead>
+        <tr>
+            <th>Parameter</th>
+            <th>Parameter Data</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for key, value in info_dict.items() %}
+            <tr>
+                <td>{{ key }}</td>
+                <td>{{ value }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>

@@ -124,23 +124,37 @@ def get_saved_job_info():
 
 
 @jobs.route(f'/{jobs.name}/saved_jobs/_add', methods=['GET', 'POST'])
-def add_saved_job():
-    form = get_add_job_form()
-    form.engine_name.choices = plugin_tools.get_list_of_engines()
-    # form.type.choices = [(item['id'], item['name']) for item in get_location_types()]
+def submit_engine_data():
+
+    if request.method == 'POST':
+        engine_name = request.form.get('engine-name')
+        engine_class = request.form.get('engine-class')
+
+        if engine_name is None and engine_class is None:
+            print(f"{engine_name} ---- {engine_class}")
+        else:
+            return redirect(url_for('jobs.add_saved_job', engine_name=engine_name, engine_class=engine_class))
+
+    engines = plugin_tools.get_list_of_engines()
+    return render_template('jobs/saved_jobs_add.html', engines=engines)
+
+
+@jobs.route(f'/{jobs.name}/saved_jobs/_add2/<string:engine_name>&<string:engine_class>', methods=['GET', 'POST'])
+#@jobs.route(f'/{jobs.name}/saved_jobs/_add?engine=<string:engine_name>', methods=['GET', 'POST'])
+def add_saved_job(engine_name, engine_class):
+    class_object = plugin_tools.get_engine_class(engine_name, engine_class)
+    class_fields = class_object.fields_request()
+    form = get_add_job_form(class_fields)
     if form.validate_on_submit():
         new_info = {}
-        new_info['name'] = form.name.data
-        new_info['engine_name'] = form.engine_name.data
-        new_info['engine_class'] = form.engine_class.data
+        new_info['ub_name'] = form.name.data
+        new_info['ub_description'] = form.description.data
         add_job(new_info)
         flash("Job has been added", category='success')
         return redirect(url_for('jobs.saved_jobs'))
-    elif request.method == 'GET':
-        pass
     # we can use the same template as it's just going to be the same fields
     # as the fields in the edit form
-    return render_template("jobs/saved_jobs_edit.html", form=form)
+    return render_template("jobs/saved_jobs_add.html", form=form)
 
 
 @jobs.route(f'/{jobs.name}/saved_jobs/_run_jobs', methods=['GET', 'POST'])
@@ -160,6 +174,8 @@ def get_engine_classes():
     engine_name = request.args.get('engine_name', "none", type=str)
     classes = plugin_tools.get_engine_classes(engine_name)
     return json.dumps(classes)
+
+
 '''
 @system.route(f'/{system.name}/processes/_update_queue')
 def update_queue():

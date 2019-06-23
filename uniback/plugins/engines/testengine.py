@@ -43,27 +43,9 @@ class Backup(UBBackup):
         self.status('running')
         command = self.generate_run_command()
         self.log(f'Generated run command: {command}')
-        try:
-            self.task = subprocess.Popen(
-                command,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT)
-            # stdout, stderr = self.task.communicate()
-        except Exception as e:
-            self.log(f'Exception 1: {e}')
-            self.log(f'Traceback: {traceback.format_exc()}')
-            self.status('error')
-            return
-        try:
-            while self.task.poll() is None:
-                self.parse_input(self.task.stdout)
-                # self.log(self.progress_tracker.get_current_progress())
-        except Exception as e:
-            self.log(f'Exception 2: {e}')
-            self.log(f'Traceback: {traceback.format_exc()}')
-            self.status('error')
-            return
+        self.start_subprocess(command)
         self.log(f'Errors: {self.task.stderr}')
+        sleep(10)
         self.status('success')
 
     def generate_run_command(self):
@@ -73,8 +55,12 @@ class Backup(UBBackup):
         # backup_to = ""
         # run_command.append('\"Y:\\Working Folder\\UBTests\\Sauce\"')
         # run_command.append('\"Y:\\Working Folder\\UBTests\\Destination\"')
-        run_command.append('\"C:\\Users\\Arnas\\Downloads\\UBTest\\Sauce\"')
-        run_command.append('\"C:\\Users\\Arnas\\Downloads\\UBTest\\Destination\"')
+        backup_source = self.backup_set['root']
+        run_command.append(backup_source)
+        run_command.append(self.repository)
+        run_command.append(self.parse_backup_set())
+        # run_command.append('\"C:\\Users\\Arnas\\Downloads\\UBTest\\Sauce\"')
+        # run_command.append('\"C:\\Users\\Arnas\\Downloads\\UBTest\\Destination\"')
 
         run_command.append('/E')
         run_command = ' '.join(run_command)
@@ -83,6 +69,8 @@ class Backup(UBBackup):
     def parse_backup_set(self):
         if self.backup_set.type is BackupSetTypes.BS_TYPE_FOLDERS:
             return self.parse_folders_bs()
+        elif self.backup_set.type is BackupSetTypes.BS_TYPE_FILESFOLDERS:
+            return self.parse_file_folders_bs()
         else:
             pass  # pass during development
             # raise BSNotSupportedException("Backup set of type "
@@ -97,12 +85,21 @@ class Backup(UBBackup):
             parameter += os.path.join(root, folder)
         return parameter
 
+    def parse_file_folders_bs(self):
+        parameter = ''
+        num_items = self.backup_set.get('num_items')
+        root = self.backup_set['root']
+        for item in self.backup_set['items']:
+            parameter += (item + ' ')
+        
+
     @staticmethod
-    def fields_request(repository_list):
+    def fields_request():
         field_list = []
-        field_list.append(dict(name="name", label="Job name", type="string", required=True))
-        field_list.append(dict(name="repository", label="Repository", type="select", values=repository_list, required=True))
+        # field_list.append(dict(name="testfield", label="Test Lol", type="string", required=True))
+        # field_list.append(dict(name="credentialTest", label="Credential Test", type="credential", required=True))
         return field_list
+
 
 
 class Restore(UBRestore):

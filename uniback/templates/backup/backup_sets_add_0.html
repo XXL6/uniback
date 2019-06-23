@@ -1,0 +1,89 @@
+{% extends "backup/backup_sets.html" %}
+{% set active_menu = "backup_sets" %}
+{% block menu_content %}
+    <form class="ub-form form-style-1" method="POST" action="" enctype="multipart/form-data"><!-- enctype required for images or something -->
+        {{ form.hidden_tag() }}
+        <fieldset class="form-group">
+            <legend class="border-bottom">Files and Folders Set</legend>
+            <div class="form-group">
+                {{ form.name.label(class="form-control-label") }}
+                {% if form.name.errors %}
+                {{ form.name(class="form-control is-invalid") }}
+                <div class="invalid-feedback">
+                    {% for error in form.name.errors %}
+                        <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+                {% else %}
+                {{ form.name(class="form-control") }}
+                {% endif %}
+            </div>
+            <div class="form-group">
+                {{ form.file_list(class="form-control") }}
+            </div>
+            <div class="form-group">
+                <label class="form-control-label">File/Folder select</label>
+                <div class="ub-file-select">
+                    <div id="file-selector" class="form-control"></div>
+                </div>
+            </div>
+            <div class="form-group">
+                {{ form.submit(class="form-control") }}
+            </div>
+        </fieldset>
+    </form>
+    
+    <script>
+        $( function () { $("#file-selector").jstree({ 
+                'core' : {
+                    "animation": 50,
+                    'data' : {
+                        'url': $SCRIPT_ROOT + "/backup/backup_sets/_get_directory_listing",
+                        'data': function(node) {
+                            return {
+                                'id': node.id,
+                                'path': $("#file-selector").jstree().get_path(node.id, "\\")
+                            }
+                        },
+                        'dataType': 'json',
+                        'error': function (data) {
+                            new Noty({ theme: 'relax', text: data.responseJSON.errormsg, layout: 'bottomCenter', type: 'error' }).show();
+                        }
+                    },
+                    'themes': {
+                        'name': 'custom',
+                        'dots': 'true',
+                        'responsive': 'true',
+                        'stripes': 'false'
+                    },
+                    'loaded_state': true
+                },
+                'plugins': [
+                    'checkbox', 'wholerow'
+                ],
+                'checkbox': {
+                    //"keep_selected_style": false,
+                    "tie_selection": false,
+                    "whole_node": false
+                }
+        })
+        });
+
+        $(function () {
+            $('form').submit(function () {
+                var tree_object = $("#file-selector").jstree();
+                var temp_list = tree_object.get_top_checked(true);
+                var jstree_state = tree_object.get_state();
+                var new_list = {
+                    'file_list': []
+                };
+                temp_list.forEach(function (element) {
+                    new_list['file_list'].push(tree_object.get_path(element.id, "\\"));
+                });
+                new_list['state'] = jstree_state;
+                document.getElementById('file_list').value = JSON.stringify(new_list);
+            });
+        });
+
+    </script>
+{% endblock menu_content %}

@@ -1,0 +1,106 @@
+{% extends "jobs/jobs.html" %}
+{% set active_menu = "saved_jobs" %}
+{% block menu_content %}
+
+    {% if form %}
+        <form class="ub-form form-style-1" method="POST" action="" enctype="multipart/form-data"><!-- enctype required for images or something -->
+            {{ form.hidden_tag() }}
+            <fieldset class="form-group-fieldset">
+                <legend class="border-bottom">General Job Attributes</legend>
+                <div class="form-group">
+                    {{ form.ub_name.label(class="form-control-label") }}
+                    {% if form.ub_name.errors %}
+                    {{ form.ub_name(class="form-control is-invalid input-field") }}
+                    <div class="invalid-feedback">
+                        {% for error in form.ub_name.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    {{ form.ub_name(class="form-control input-field") }}
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    {{ form.ub_description.label(class="form-control-label") }}
+                    {% if form.ub_description.errors %}
+                    {{ form.ub_description(class="form-control is-invalid input-field") }}
+                    <div class="invalid-feedback">
+                        {% for error in form.ub_description.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    {{ form.ub_description(class="form-control input-field") }}
+                    {% endif %}
+                </div>
+            </fieldset>
+            <fieldset class="form-group-fieldset">
+                <legend class="border-bottom">Engine Specific Job Attributes</legend>
+                {% for item in form %}
+                    {# we do not want to put the submit field in the for loop as it might
+                        appear out of order instead of the bottom. #}
+                    {% if item.id != 'csrf_token' and item.id != 'submit' and item.id != 'ub_description' and item.id != 'ub_name'%}
+                        <div class="form-group">
+                            {{ item.label(class="form-control-label") }}
+                            {% if item.errors %}
+                            {{ item(class="form-control is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in item.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                            {{ item(class="form-control") }}
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </fieldset>
+            <div class="form-group">
+                {{ form.submit(class="form-control input-field") }}
+            </div>
+        </form>
+    {% else %}
+        <form action="{{url_for('jobs.submit_engine_data')}}" method="POST" class="form-style-1" name="class_select_form">
+            <label>Engine Name</label>
+            <select class="form-control" id="engine-name" name="engine-name">
+                <option value="None">Select an engine</option>
+                {% for engine_value, engine_name in engines %}
+                    <option value={{engine_value}}>{{engine_name}}</option>
+                {% endfor %}
+            </select>
+            <label>Engine Class</label>
+            <select class="form-control" id="engine-class" name="engine-class">
+                <option value="None">Select a class</option>
+                {#% for class_value, class_name in classes %}
+                    <option value={{class_value}}>{{class_name}}</option>
+                {% endfor %#}
+            </select>
+            <input type="submit" name="Submit" id="submit-button" value="Next"/>
+        </form>
+    {% endif %}
+
+    <script type="text/javascript">
+        $( "#engine-name" ).change(get_engine_classes);
+
+        /*{#function get_engine_classes(event) {
+            var engine_name = $( "#engine_name" ).val();
+                var url = "{{ url_for('jobs.add_saved_job') }}?engine_name="+$( "#engine_name" ).val()+"&job_name="+$( "#name" ).val();
+                document.location = url;
+        }#}*/
+        function get_engine_classes(event)
+        {
+            $.getJSON( "{{ url_for('jobs.get_engine_classes') }}", {
+                engine_name: $( "#engine-name" ).val()
+            }, function(data) {
+                var i;
+                var selectList = $( "#engine-class" );
+                selectList.empty();
+                for (i = 0; i < data.length; i++) {
+                    var o = new Option(data[i][0], data[i][1]);
+                    selectList.append(o);
+                }
+            });
+        }
+    </script>
+{% endblock menu_content %}

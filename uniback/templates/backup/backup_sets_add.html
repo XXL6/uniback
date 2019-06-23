@@ -1,45 +1,14 @@
 {% extends "backup/backup_sets.html" %}
 {% set active_menu = "backup_sets" %}
 {% block menu_content %}
-    {% if not form %}
-        <div class="property-select-form">
-            <form class="ub-form form-style-1" id="backup-set-select-form" method="POST">
-                <select class="form-control" name="backup-set-select">
-                    {% for set, set_name in available_backup_sets %}
-                        <option value="{{ set }}">{{ set_name }}</option>
-                    {% endfor %}
-                </select>
-                <input class="form-control" type="submit" value="Next" /> 
-            </form>            
-        </div>
-    {% else %}
-        <form class="ub-form form-style-1" method="POST" action="" enctype="multipart/form-data"><!-- enctype required for images or something -->
-            {{ form.hidden_tag() }}
-            <fieldset class="form-group">
-                <legend class="border-bottom">Backup Set</legend>
-                {% for item in form %}
-                    {# we do not want to put the submit field in the for loop as it might
-                        appear out of order instead of the bottom. #}
-                    {% if item.id != 'csrf_token' and item.id != 'submit'%}
-                        <div class="form-group">
-                            {{ item.label(class="form-control-label") }}
-                            {% if item.errors %}
-                            {{ item(class="form-control is-invalid") }}
-                            <div class="invalid-feedback">
-                                {% for error in item.errors %}
-                                    <span>{{ error }}</span>
-                                {% endfor %}
-                            </div>
-                            {% else %}
-                            {{ item(class="form-control") }}
-                            {% endif %}
-                        </div>
-                    {% endif %}
+    <div class="property-select-form">
+        <form class="ub-form form-style-1" id="backup-set-select-form" method="POST">
+            <select class="form-control" name="backup-set-select">
+                {% for set, set_name in available_backup_sets %}
+                    <option value="{{ set }}">{{ set_name }}</option>
                 {% endfor %}
-                <div class="form-group">
-                    {{ form.submit(class="form-control") }}
-                </div>
-            </fieldset>
-        </form>
-    {% endif %}
+            </select>
+            <input class="form-control" type="submit" value="Next" /> 
+        </form>            
+    </div>
 {% endblock menu_content %}

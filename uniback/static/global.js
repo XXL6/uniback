@@ -24,28 +24,7 @@ function getVisibleItemIds() {
     var itemList = $( ".list-checkbox" ).get();
     var idList = [];
     for (var i = 0; i < itemList.length; i++) {
-        idList.push(itemList[i].value);
+        idList.push(parseInt(itemList[i].value, 10));
     }
     return idList;
 }
-
-function removeListGroupItem(id) {
-    $( "#" + id + ".list-group-item" ).remove();
-}
-
-(function(global){
-
-    function getVisibleItemIds() {
-        var itemList = $( ".list-checkbox" ).get();
-        var idList = [];
-        for (var i = 0; i < itemList.length; i++) {
-            idList.push(itemList[i].value);
-        }
-        alert('benis2');
-        return idList;
-    }
-    
-    function removeListGroupItem(id) {
-        $( "#" + id + ".list-group-item" ).remove();
-    }
-  })(window)
